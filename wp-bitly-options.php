@@ -60,7 +60,7 @@ class wpbitly_options {
 	private function _get_version() {
 		$version = get_option( 'wpbitly_version' );
 
-		if ( $version == FALSE ) {
+		if ( $version == FALSE || $version != WPBITLY_VERSION ) {
 			update_option( 'wpbitly_version', WPBITLY_VERSION );
 			return WPBITLY_VERSION;
 		}
@@ -94,7 +94,7 @@ class wpbitly_options {
 	}
 
 
-	private function _notice_setup() {
+	public function _notice_setup() {
 		return $this->display_notice( '<strong>' . __( 'WP Bit.Ly is almost ready!', 'wpbitly' ) . '</strong> ' . sprintf( __( 'Please visit the %1 to configure WP Bit.ly', 'wpbitly' ), '<a href="options.php?page=wpbitly">' . __( 'Settings Page', 'wpbitly' ) . '</a>' ), 'error' );
 	}
 
