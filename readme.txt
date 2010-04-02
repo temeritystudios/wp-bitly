@@ -38,9 +38,9 @@ No, WP Bit.ly can do this for you automatically through the options page. Select
 
 WP Bit.ly validates all short links whenever you update a post, so if you change the permalink or location of the post, your old short link will be replaced with a new one.
 
-= Does WP Bit.ly conform to the [HTML/HTTP shortlink specification](http://purl.org/net/shortlink "HTML/HTTP shortlink specification")? =
+= Does WP Bit.ly conform to the HTML/HTTP shortlink specification? =
 
-Definitely. WP Bit.ly not only adds a `rel=` link to every pages header, but it also inserts the `Link:` specification into your pages HTTP headers.
+Definitely. WP Bit.ly not only adds a `rel=` link to every pages header, but it also inserts the `Link:` specification into your pages HTTP headers. The specification can be found [here](http://purl.org/net/shortlink "HTML/HTTP shortlink specification")
 
 = How do I include the short links using WordPress shortcode? =
 
