@@ -62,5 +62,8 @@ Bug reports (or Oops reports as I call them) can be filed through a [dedicated p
 
 == Changelog ==
 
+= 0.1.4 =
+* Fixed a bug in the short link generation for existing posts and pages
+
 = 0.1.0 =
 * Initial release of WP Bit.ly
