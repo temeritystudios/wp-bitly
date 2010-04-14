@@ -4,7 +4,7 @@ Donate Link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: short, link, bitly, url, shortener, social, media, twitter
 Requires at least: 2.8
 Tested up to: 2.9.2
-Stable tag: 0.1.0
+Stable tag: 0.1.4
 
 WP Bit.ly uses the Bit.ly API to generate short links for all of your posts and pages. Statistics are displayed for each link from the dashboard.
 
