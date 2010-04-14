@@ -3,8 +3,6 @@
 add_action( 'admin_menu', 'wpbitly_add_pages' );
 add_action( 'admin_menu', 'wpbitly_statistics_metabox' );
 
-add_action( 'do_meta_boxes', 'wpbitly_remove_metabox' );
-
 
 function wpbitly_add_pages() {
 
@@ -28,20 +26,23 @@ function wpbitly_print_scripts() {
 
 
 function wpbitly_statistics_metabox() {
-	add_meta_box( 'wpbitly_clicks', 'WP Bit.ly Statistics', 'wpbitly_build_clicks_metabox', 'page', 'side' );
-	add_meta_box( 'wpbitly_clicks', 'WP Bit.ly Statistics', 'wpbitly_build_clicks_metabox', 'post', 'side' );
+	global $post;
+
+	if ( is_object( $post ) && get_post_meta( $post->ID, '_wpbitly', TRUE ) ) {
+		add_meta_box( 'wpbitly_stats', 'WP Bit.ly Statistics', 'wpbitly_build_statistics_metabox', 'page', 'side' );
+		add_meta_box( 'wpbitly_stats', 'WP Bit.ly Statistics', 'wpbitly_build_statistics_metabox', 'post', 'side' );
+	}
+
 }
 
 
-function wpbitly_build_clicks_metabox() {
+function wpbitly_build_statistics_metabox() {
 	global $wpbitly, $post;
 
 	$wpbitly_link = get_post_meta( $post->ID, '_wpbitly', TRUE );
 
-	if ( ! $wpbitly_link ) {
-		echo '<p>This shouldn\'t be here!</p>';
+	if ( ! $wpbitly_link )
 		return;
-	}
 
 	$url = sprintf( $wpbitly->url['clicks'], $wpbitly_link, $wpbitly->options['bitly_username'], $wpbitly->options['bitly_api_key'] );
 	$bitly_response = wpbitly_curl( $url );
@@ -54,17 +55,6 @@ function wpbitly_build_clicks_metabox() {
 	else {
 		echo '<p>There was a problem retrieving statistics from Bit.ly.</p>';
 	}
-
-}
-
-
-function wpbitly_remove_metabox() {
-	global $post;
-
-	$type = ( is_page() ? 'page' : 'post' );
-
-	if ( ! get_post_meta( $post->ID, '_wpbitly', TRUE ) )
-		remove_meta_box( 'wpbitly_clicks', $type, 'side' );
 
 }
 
@@ -175,15 +165,9 @@ function wpbitly_postbox_generate() {
 
 			$posts = get_posts( "numberposts=-1&post_type={$generate}" );
 
-			foreach ( $posts as $post ) {
-
-				if ( get_post_meta( $post->ID, '_wpbitly', TRUE ) )
-					continue;
-
-				$wpbitly_link = wpbitly_generate_shortlink( $post->ID );
-				update_post_meta( $post->ID, '_wpbitly', $wpbitly_link );
-
-			}
+			foreach ( $posts as $the )
+				if ( ! get_post_meta( $the->ID, '_wpbitly', TRUE ) )
+					wpbitly_generate_shortlink( $the->ID );
 
 			$output .= '<div class="updated fade"><p>' . $status . __( 'Short links have been generated for the selected post type!', 'wpbitly' ) . '</p></div>';
 

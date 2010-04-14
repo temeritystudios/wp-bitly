@@ -2,7 +2,7 @@
 Plugin Name: WP Bit.ly
 Plugin URI: http://mark.watero.us/wordpress-plugins/wp-bitly/
 Description: WP Bit.ly uses the Bit.ly API to generate short links for all your articles and pages. Visitors can use the link to email, share, or bookmark your pages quickly and easily.
-Version: 0.1.0
+Version: 0.1.4
 Author: Mark Waterous
 Author URI: http://mark.watero.us/
 
@@ -23,13 +23,14 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-define( 'WPBITLY_VERSION', '0.1.0' );
+define( 'WPBITLY_VERSION', '0.1.4' );
 
 register_activation_hook( __FILE__, 'wpbitly_activate' );
 register_deactivation_hook( __FILE__, 'wpbitly_deactivate' );
 
 require_once( 'wp-bitly-options.php' );
 require_once( 'wp-bitly-views.php' );
+
 
 	// Load our controller class... it's helpful!
 	$wpbitly = new wpbitly_options;
@@ -150,14 +151,14 @@ function wpbitly_generate_shortlink( $pid, $ret = TRUE ) {
 
 
 	if ( empty( $wpbitly->options['bitly_username'] ) || empty( $wpbitly->options['bitly_api_key'] ) || get_option( 'wpbitly_invalid' ) )
-		return;
+		return FALSE;
 
 	if ( $wpbitly_link != FALSE ) {
 		$url = sprintf( $wpbitly->expand, $wpbitly_link, $wpbitly->options['bitly_username'], $wpbitly->options['bitly_api_key'] );
 		$bitly_response = wpbitly_curl( $url );
 
 		if ( is_array( $bitly_response ) && $bitly_response['status_code'] == 200 && $bitly_response['data']['expand'][0]['long_url'] == $permalink )
-			return;
+			return FALSE;
 
 		delete_post_meta( $pid, '_wpbitly' );
 	}

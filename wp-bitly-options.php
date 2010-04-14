@@ -84,22 +84,22 @@ class wpbitly_options {
 		}
 
 		if ( empty( $options['bitly_username'] ) || empty( $options['bitly_api_key'] ) )
-			add_action( 'admin_notices', array( $this, '_notice_setup' ) );
+			add_action( 'admin_notices', array( $this, 'notice_setup' ) );
 
 		if ( get_option( 'wpbitly_invalid' ) != FALSE && isset( $_GET['page'] ) && $_GET['page'] == 'wpbitly' )
-			add_action( 'admin_notices', array( $this, '_notice_invalid' ) );
+			add_action( 'admin_notices', array( $this, 'notice_invalid' ) );
 
 		return $options;
 
 	}
 
 
-	public function _notice_setup() {
+	public function notice_setup() {
 		return $this->display_notice( '<strong>' . __( 'WP Bit.Ly is almost ready!', 'wpbitly' ) . '</strong> ' . sprintf( __( 'Please visit the %1 to configure WP Bit.ly', 'wpbitly' ), '<a href="options.php?page=wpbitly">' . __( 'Settings Page', 'wpbitly' ) . '</a>' ), 'error' );
 	}
 
 
-	public function _notice_invalid() {
+	public function notice_invalid() {
 		return $this->display_notice( '<strong>' . __( 'Invalid API Key;', 'wpbitly' ) . '</strong> ' . __( 'Your username and API key for bit.ly can\'t be validated. All features of WP Bit.ly are temporarily disabled.', 'wpbitly' ), 'error' );
 	}
 
@@ -116,6 +116,65 @@ class wpbitly_options {
 
 		echo $string;
 
+	}
+
+}
+
+abstract class wpbitly_post {
+
+	private static $pid;
+
+	private static $permalink = array();
+
+	private static $shortlink;
+
+	public static function id() {
+		if ( ! self::$pid ) self::_get_post_id();
+		return self::$pid;
+	}
+
+	public static function permalink( $key = 'raw' ) {
+		if ( empty( self::$permalink ) ) self::_get_permalink();
+
+		switch ( $key ) {
+			case 'raw':    return self::$permalink['raw'];
+			case 'encoded': return self::$permalink['encoded'];
+			default:       return self::$permalink;
+		}
+	}
+
+	public static function shortlink() {
+		if ( ! self::$shortlink ) self::_get_shortlink();
+		return self::$shortlink;
+	}
+
+
+	private static function _get_post_id() {
+		global $post;
+
+		if ( is_null( $post ) )
+			trigger_error( 'wpbitly::id() cannot be called before $post is set in the global namespace.', E_USER_ERROR );
+
+		self::$pid = $post->ID;
+
+		if ( $parent = wp_is_post_revision( self::$pid ) )
+			self::$pid = $parent;
+
+	}
+
+
+	private static function _get_permalink() {
+
+		if ( ! is_array( self::$permalink ) ) self::$permalink = array();
+
+		self::$permalink['raw']     = get_permalink( self::$pid );
+		self::$permalink['encoded'] = urlencode( self::$permalink['raw'] );
+
+	}
+
+
+	private static function _get_shortlink() {
+		self::$shortlink = get_post_meta( self::$pid, '_wpbitly', TRUE );
 	}
 
 }
