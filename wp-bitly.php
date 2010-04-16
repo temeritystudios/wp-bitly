@@ -2,7 +2,7 @@
 Plugin Name: WP Bit.ly
 Plugin URI: http://mark.watero.us/wordpress-plugins/wp-bitly/
 Description: WP Bit.ly uses the Bit.ly API to generate short links for all your articles and pages. Visitors can use the link to email, share, or bookmark your pages quickly and easily.
-Version: 0.1.4
+Version: 0.1.5
 Author: Mark Waterous
 Author URI: http://mark.watero.us/
 
@@ -23,7 +23,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-define( 'WPBITLY_VERSION', '0.1.4' );
+define( 'WPBITLY_VERSION', '0.1.5' );
 
 register_activation_hook( __FILE__, 'wpbitly_activate' );
 register_deactivation_hook( __FILE__, 'wpbitly_deactivate' );
@@ -245,7 +245,7 @@ function wpbitly_shortcode( $atts ) {
 function wpbitly_shortlink_header() {
 	global $wp_query;
 
-	if ( headers_sent() || ! is_singular() || ! is_front_page() )
+	if ( headers_sent() )
 		return;
 
 	if ( ! $wpbitly_link = wpbitly_get_shortlink( $wp_query->get_queried_object_id() ) )
@@ -263,13 +263,10 @@ function wpbitly_shortlink_header() {
 function wpbitly_shortlink_wp_head() {
 	global $wp_query;
 
-	if ( ! is_singular() || ! is_front_page() )
-		return;
-
 	if ( ! $wpbitly_link = wpbitly_get_shortlink( $wp_query->get_queried_object_id() ) )
 		return;
 
-	echo '<link rel="shortlink" href="' . $wpbitly_link . "\"/>\n";
+	echo "\n\t<link rel=\"shortlink\" href=\"{$wpbitly_link}\"/>\n";
 
 }
 
