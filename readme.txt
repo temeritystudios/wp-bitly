@@ -1,9 +1,9 @@
 === Plugin Name ===
-Contributors: mwaterous
+Contributors: mwaterous, chipbennett
 Donate Link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=9847234
 Tags: short, link, bitly, url, shortener, social, media, twitter
-Requires at least: 2.8
-Tested up to: 2.9.2
+Requires at least: 2.9.2
+Tested up to: 3.0
 Stable tag: 0.1.5
 
 WP Bit.ly uses the Bit.ly API to generate short links for all of your posts and pages. Statistics are displayed for each link from the dashboard.
@@ -40,7 +40,7 @@ WP Bit.ly validates all short links whenever you update a post, so if you change
 
 = Does WP Bit.ly conform to the HTML/HTTP shortlink specification? =
 
-Definitely. WP Bit.ly not only adds a `rel=` link to every pages header, but it also inserts the `Link:` specification into your pages HTTP headers. The specification can be found [here](http://purl.org/net/shortlink "HTML/HTTP shortlink specification")
+Definitely. WP Bit.ly used to add the appropriate meta and http header information itself, but thanks to updates to the WordPress 3.0 short link API, this is handled almost entirely by core with WP Bit-ly piggybacking its short links as opposed to the internally generated short links provided by WP.
 
 = How do I include the short links using WordPress shortcode? =
 
@@ -52,15 +52,11 @@ Similar to the shortcode above, you can use `<?php wpbitly_print(); ?>`. This fu
 
 Setting the first argument (text) will change the output of the link text to whatever you choose. The second is a boolean true or false; setting this to true echos the output, and false will return it for use later (default: true). Setting the pid will tell it what post ID you want to display the short link for, and defaults to the current post.
 
-= I want WP Bit.ly to... =
-
-Feature requests are more than welcome! Please visit me on [my blog](http://mark.watero.us/ "Mark.") and contact me either through the available forms or via a comment. I will give consideration to all feedback I recieve!
-
-= I don't think WP Bit.ly should... =
-
-Bug reports (or Oops reports as I call them) can be filed through a [dedicated page](http://mark.watero.us/wordpress-plugins/oops/ "Oops Reports") on [my blog](http://mark.watero.us/ "Mark.").
-
 == Changelog ==
+
+= 0.1.7 =
+* Added support for WordPress 3.0 shortlink API
+* Minor bug fixes to the activation and uninstall hooks.
 
 = 0.1.5 =
 * Short link header data wasn't being properly inserted.

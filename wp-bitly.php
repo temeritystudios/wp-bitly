@@ -1,10 +1,9 @@
 <?php /*
 Plugin Name: WP Bit.ly
-Plugin URI: http://mark.watero.us/wordpress-plugins/wp-bitly/
+Plugin URI: http://wordpress.org/extend/wp-bitly/
 Description: WP Bit.ly uses the Bit.ly API to generate short links for all your articles and pages. Visitors can use the link to email, share, or bookmark your pages quickly and easily.
-Version: 0.1.5
-Author: Mark Waterous
-Author URI: http://mark.watero.us/
+Version: 0.1.7
+Author: <a href="http://mark.watero.us/">Mark Waterous</a> & <a href="http://www.chipbennett.net/">Chip Bennett</a>
 
 Copyright 2010 Mark Waterous (mark@watero.us)
 
@@ -23,33 +22,44 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-define( 'WPBITLY_VERSION', '0.1.5' );
+define( 'WPBITLY_VERSION', '0.1.7' );
 
-register_activation_hook( __FILE__, 'wpbitly_activate' );
-register_deactivation_hook( __FILE__, 'wpbitly_deactivate' );
+register_uninstall_hook( __FILE__, 'wpbitly_uninstall' );
 
 require_once( 'wp-bitly-options.php' );
 require_once( 'wp-bitly-views.php' );
 
 
-	// Load our controller class... it's helpful!
-	$wpbitly = new wpbitly_options;
+// Load our controller class... it's helpful!
+$wpbitly = new wpbitly_options(
+	array(
+		'bitly_username' => '',
+		'bitly_api_key'  => '',
+		'post_types'     => 'any',
+	)
+);
 
 
 // If we're competing with WordPress.com stats... chances are people are already using wp.me
 // but we'll remove the competitive headers just in case.
-if ( function_exists( 'wpme_shortlink_header' ) ) {
+if ( function_exists( 'wpme_shortlink_header' ) )
+{
 	remove_action( 'wp',      'wpme_shortlink_header' );
 	remove_action( 'wp_head', 'wpme_shortlink_wp_head' );
 }
 
-// And add our own
+/**
+ * @deprecated
 add_action( 'wp',      'wpbitly_shortlink_header' );
 add_action( 'wp_head', 'wpbitly_shortlink_wp_head' );
+*/
+
 
 // Automatic generation is disabled if the API information is invalid
 if ( ! get_option( 'wpbitly_invalid' ) )
+{
 	add_action( 'save_post', 'wpbitly_generate_shortlink' );
+}
 
 
 // Settings menu on plugins page.
@@ -58,13 +68,11 @@ add_filter( 'plugin_action_links', 'wpbitly_filter_plugin_actions', 10, 2 );
 // One guess?
 add_shortcode( 'wpbitly', 'wpbitly_shortcode' );
 
-
+// WordPress 3.0!
+add_filter( 'pre_get_shortlink', 'wpbitly_filter_shortlink' );
 
 /**
- * Activation routine sets up our initial options and versioning information.
- * It would also generate links for all posts and pages, except that we have
- * no way to accept installation/configuration information on activate! Yet!
- */
+ * @deprecated
 
 function wpbitly_activate() {
 
@@ -77,6 +85,7 @@ function wpbitly_activate() {
 	update_option( 'wpbitly_options', $options );
 
 }
+*/
 
 
 /**
@@ -85,7 +94,8 @@ function wpbitly_activate() {
  * here is mission critical or hard to reactivate.
  */
 
-function wpbitly_deactivate() {
+function wpbitly_uninstall()
+{
 
 	// Delete associated options
 	delete_option( 'wpbitly_version' );
@@ -97,7 +107,9 @@ function wpbitly_deactivate() {
 
 	// And remove our meta information from them
 	foreach ( $posts as $post )
+	{
 		delete_post_meta( $post->ID, '_wpbitly' );
+	}
 
 }
 
@@ -110,13 +122,17 @@ function wpbitly_deactivate() {
  * @param $file  string The current plugin being filtered.
  */
 
-function wpbitly_filter_plugin_actions( $links, $file ) {
+function wpbitly_filter_plugin_actions( $links, $file )
+{
 	static $wpbitly_plugin;
 
 	if ( ! isset( $wpbitly_plugin ) )
+	{
 		$wpbitly_plugin = plugin_basename( __FILE__ );
+	}
 	
-	if ( $file == $wpbitly_plugin ) {
+	if ( $file == $wpbitly_plugin )
+	{
 		$settings_link = '<a href="' . admin_url( 'options-general.php?page=wpbitly' ) . '">' . __( 'Settings', 'wpbitly' ) . '</a>';
 		array_unshift( $links, $settings_link );
 	}
@@ -137,28 +153,30 @@ function wpbitly_filter_plugin_actions( $links, $file ) {
  * @todo If a link is found for a specific post, we should check it against Bit.ly's API to ensure it's still valid. If not, regenerate.
  */
 
-function wpbitly_generate_shortlink( $pid, $ret = TRUE ) {
+function wpbitly_generate_shortlink( $pid, $ret = true )
+{
 	global $wpbitly;
 
-
 	if ( $parent = wp_is_post_revision( $pid ) )
+	{
 		$pid = $parent;
-
+	}
 
 	// Link to be generated
 	$permalink = get_permalink( $pid );
-	$wpbitly_link = get_post_meta( $pid, '_wpbitly', TRUE );
+	$wpbitly_link = get_post_meta( $pid, '_wpbitly', true );
 
 
 	if ( empty( $wpbitly->options['bitly_username'] ) || empty( $wpbitly->options['bitly_api_key'] ) || get_option( 'wpbitly_invalid' ) )
-		return FALSE;
+		return false;
 
-	if ( $wpbitly_link != FALSE ) {
+	if ( $wpbitly_link != false )
+	{
 		$url = sprintf( $wpbitly->expand, $wpbitly_link, $wpbitly->options['bitly_username'], $wpbitly->options['bitly_api_key'] );
 		$bitly_response = wpbitly_curl( $url );
 
 		if ( is_array( $bitly_response ) && $bitly_response['status_code'] == 200 && $bitly_response['data']['expand'][0]['long_url'] == $permalink )
-			return FALSE;
+			return false;
 
 		delete_post_meta( $pid, '_wpbitly' );
 	}
@@ -169,7 +187,9 @@ function wpbitly_generate_shortlink( $pid, $ret = TRUE ) {
 
 	// Success?
 	if ( is_array( $bitly_response ) && $bitly_response['status_code'] == 200 )
+	{
 		update_post_meta( $pid, '_wpbitly', $bitly_response['data']['url'] );
+	}
 
 }
 
@@ -181,14 +201,29 @@ function wpbitly_generate_shortlink( $pid, $ret = TRUE ) {
  * @param $pid int The WordPress post ID to be used.
  */
 
-function wpbitly_get_shortlink( $pid ) {
+function wpbitly_get_shortlink( $pid )
+{
 	global $post;
 
 	if ( empty( $pid ) && ! $pid = $post->ID )
-		return FALSE;
+		return false;
 
-	return get_post_meta( $pid, '_wpbitly', TRUE );
+	return get_post_meta( $pid, '_wpbitly', true );
 
+}
+
+
+/**
+ * Return the wpbitly_get_shortlink method to the built in WordPress pre_get_shortlink
+ * filter for internal use.
+ *
+ * @todo This seems cluttered having so many methods to grab one shortlink - is it?
+ */
+
+function wpbitly_filter_shortlink()
+{
+	global $post;
+	return wpbitly_get_shortlink( $post->ID );
 }
 
 
@@ -201,7 +236,8 @@ function wpbitly_get_shortlink( $pid ) {
  * @param $pid  int    The WordPress post ID to be used. Defaults to $post->ID if it can.
  */
  
-function wpbitly_print( $text = '', $echo = TRUE, $pid = '' ) {
+function wpbitly_print( $text = '', $echo = true, $pid = '' )
+{
 	global $post;
 
 	// Attempt to get the post ID
@@ -211,11 +247,13 @@ function wpbitly_print( $text = '', $echo = TRUE, $pid = '' ) {
 	$wpbitly_link = wpbitly_get_shortlink( $pid );
 
 	if ( empty( $text ) )
+	{
 		$text = $wpbitly_link;
+	}
 
 	$wpbitly_print = '<a href="' . $wpbitly_link . '" rel="shortlink" class="wpbitly shortlink">' . $text . '</a>';
 
-	if ( $echo !== TRUE )
+	if ( $echo !== true )
 		return $wpbitly_print;
 
 	echo $wpbitly_print;
@@ -228,19 +266,19 @@ function wpbitly_print( $text = '', $echo = TRUE, $pid = '' ) {
  * arguments with the exception of echo which it has to do by default.
  */
 
-function wpbitly_shortcode( $atts ) {
+function wpbitly_shortcode( $atts )
+{
 	global $post;
 
 	extract( shortcode_atts( array( 'text' => '', 'pid' => $post->ID ), $atts ) );
 
-	return wpbitly_print( $text, FALSE, $pid );
+	return wpbitly_print( $text, false, $pid );
 
 }
 
 
 /**
- * Add the specification to the HTTP headers for our shortlink.
- */
+ * @deprecated
 
 function wpbitly_shortlink_header() {
 	global $wp_query;
@@ -254,11 +292,11 @@ function wpbitly_shortlink_header() {
 	header( 'Link: <' . $wpbitly_link . '>; rel=shortlink' );
 
 }
+*/
 
 
 /**
- * Add the specification to our HTML head for our shortlink.
- */
+ * @deprecated
 
 function wpbitly_shortlink_wp_head() {
 	global $wp_query;
@@ -269,6 +307,7 @@ function wpbitly_shortlink_wp_head() {
 	echo "\n\t<link rel=\"shortlink\" href=\"{$wpbitly_link}\"/>\n";
 
 }
+*/
 
 
 /**
@@ -276,13 +315,15 @@ function wpbitly_shortlink_wp_head() {
  * file_get_contents instead.
  */
 
-function wpbitly_curl( $url ) {
+function wpbitly_curl( $url )
+{
 	global $wpbitly;
 
 	if ( ! isset( $url ) )
-		return FALSE;
+		return false;
 
-	if ( function_exists( 'curl_init' ) ) {
+	if ( function_exists( 'curl_init' ) )
+	{
 
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -291,13 +332,14 @@ function wpbitly_curl( $url ) {
 		curl_close($ch);
 
 	}
-	else {
+	else
+	{
 		$result = file_get_contents( $url );
 	}
 
 	if ( ! empty( $result ) )
-		return json_decode( $result, TRUE );
+		return json_decode( $result, true );
 
-	return FALSE;
+	return false;
 
 }
