@@ -2,7 +2,7 @@
 Plugin Name: WP Bit.ly
 Plugin URI: http://wordpress.org/extend/wp-bitly/
 Description: WP Bit.ly uses the Bit.ly API to generate short links for all your articles and pages. Visitors can use the link to email, share, or bookmark your pages quickly and easily.
-Version: 0.1.8
+Version: 0.2.1
 Author: <a href="http://mark.watero.us/">Mark Waterous</a> & <a href="http://www.chipbennett.net/">Chip Bennett</a>
 
 Copyright 2010 Mark Waterous (mark@watero.us)
@@ -22,13 +22,20 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+global $wp_version;
 
-define( 'WPBITLY_VERSION', '0.1.8' );
+
+define( 'WPBITLY_VERSION', '0.2.1' );
 
 register_uninstall_hook( __FILE__, 'wpbitly_uninstall' );
 
-require_once( 'wp-bitly-options.php' );
-require_once( 'wp-bitly-views.php' );
+require( 'wp-bitly-options.php' );
+require( 'wp-bitly-views.php' );
+
+if ( ! version_compare( $wp_version, '3.0', '>=' ) )
+{
+	require( 'deprecated.php' );
+}
 
 
 // Load our controller class... it's helpful!
@@ -49,12 +56,6 @@ if ( function_exists( 'wpme_shortlink_header' ) )
 	remove_action( 'wp_head', 'wpme_shortlink_wp_head' );
 }
 
-/**
- * @deprecated
-add_action( 'wp',      'wpbitly_shortlink_header' );
-add_action( 'wp_head', 'wpbitly_shortlink_wp_head' );
-*/
-
 
 // Automatic generation is disabled if the API information is invalid
 if ( ! get_option( 'wpbitly_invalid' ) )
@@ -70,23 +71,7 @@ add_filter( 'plugin_action_links', 'wpbitly_filter_plugin_actions', 10, 2 );
 add_shortcode( 'wpbitly', 'wpbitly_shortcode' );
 
 // WordPress 3.0!
-add_filter( 'get_shortlink', 'wpbitly_filter_shortlink', 10, 3 );
-
-/**
- * @deprecated
-
-function wpbitly_activate() {
-
-	update_option( 'wpbitly_version', WPBITLY_VERSION );
-
-	$options['bitly_username'] = '';
-	$options['bitly_api_key']  = '';
-	$options['post_types']     = 'any';
-
-	update_option( 'wpbitly_options', $options );
-
-}
-*/
+add_filter( 'get_shortlink', 'wpbitly_get_shortlink', 10, 3 );
 
 
 /**
@@ -195,23 +180,7 @@ function wpbitly_generate_shortlink( $pid, $ret = true )
 }
 
 
-/**
- * This function is used to return the Bit.ly shortlink for a specific post.
- * If $pid is not supplied, attempt to retrieve it from the global namespace.
- *
- * @param $pid int The WordPress post ID to be used.
- */
 
-function wpbitly_get_shortlink( $pid )
-{
-	global $post;
-
-	if ( empty( $pid ) && ! $pid = $post->ID )
-		return false;
-
-	return get_post_meta( $pid, '_wpbitly', true );
-
-}
 
 
 /**
@@ -221,7 +190,7 @@ function wpbitly_get_shortlink( $pid )
  * @todo This seems cluttered having so many methods to grab one shortlink - is it?
  */
 
-function wpbitly_filter_shortlink( $shortlink, $id, $context )
+function wpbitly_get_shortlink( $shortlink, $id, $context )
 {
 	global $post;
 
@@ -243,42 +212,8 @@ function wpbitly_filter_shortlink( $shortlink, $id, $context )
 
 	}
 
-	return wpbitly_get_shortlink( $id );
+	return get_post_meta( $id, '_wpbitly', true );
 
-}
-
-
-/**
- * Used internally by the shortcode function, this can be used directly by
- * a template to display the short link.
- *
- * @param $text string The text to display as the content of the link. Defaults to the link itself.
- * @param $echo bool   Whether to echo the result or return it. Defaults to true (echo).
- * @param $pid  int    The WordPress post ID to be used. Defaults to $post->ID if it can.
- */
- 
-function wpbitly_print( $text = '', $echo = true, $pid = '' )
-{
-	global $post;
-
-	// Attempt to get the post ID
-	if ( empty( $pid ) && ! $pid = $post->ID )
-		return;
-
-	$wpbitly_link = wpbitly_get_shortlink( $pid );
-
-	if ( empty( $text ) )
-	{
-		$text = $wpbitly_link;
-	}
-
-	$wpbitly_print = '<a href="' . $wpbitly_link . '" rel="shortlink" class="wpbitly shortlink">' . $text . '</a>';
-
-	if ( $echo !== true )
-		return $wpbitly_print;
-
-	echo $wpbitly_print;
-	
 }
 
 
@@ -291,44 +226,18 @@ function wpbitly_shortcode( $atts )
 {
 	global $post;
 
-	extract( shortcode_atts( array( 'text' => '', 'pid' => $post->ID ), $atts ) );
+	$defaults = array(
+		'text' => '',
+		'title' => '',
+		'before' => '',
+		'after'  => '',
+	);
 
-	return wpbitly_print( $text, false, $pid );
+	extract( shortcode_atts( $defaults, $atts ) );
 
-}
-
-
-/**
- * @deprecated
-
-function wpbitly_shortlink_header() {
-	global $wp_query;
-
-	if ( headers_sent() )
-		return;
-
-	if ( ! $wpbitly_link = wpbitly_get_shortlink( $wp_query->get_queried_object_id() ) )
-		return;
-
-	header( 'Link: <' . $wpbitly_link . '>; rel=shortlink' );
+	return the_shortlink( $text, $title, $before, $after );
 
 }
-*/
-
-
-/**
- * @deprecated
-
-function wpbitly_shortlink_wp_head() {
-	global $wp_query;
-
-	if ( ! $wpbitly_link = wpbitly_get_shortlink( $wp_query->get_queried_object_id() ) )
-		return;
-
-	echo "\n\t<link rel=\"shortlink\" href=\"{$wpbitly_link}\"/>\n";
-
-}
-*/
 
 
 /**

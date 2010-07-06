@@ -91,7 +91,7 @@ class wpbitly_options
 			if ( ! empty( $diff ) )
 			{
 				$options = array_merge( $options, $diff );
-				updation_option( 'wpbitly_options', $options );
+				update_option( 'wpbitly_options', $options );
 			}
 		}
 
