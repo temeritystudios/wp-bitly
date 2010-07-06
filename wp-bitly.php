@@ -2,7 +2,7 @@
 Plugin Name: WP Bit.ly
 Plugin URI: http://wordpress.org/extend/wp-bitly/
 Description: WP Bit.ly uses the Bit.ly API to generate short links for all your articles and pages. Visitors can use the link to email, share, or bookmark your pages quickly and easily.
-Version: 0.1.7
+Version: 0.1.8
 Author: <a href="http://mark.watero.us/">Mark Waterous</a> & <a href="http://www.chipbennett.net/">Chip Bennett</a>
 
 Copyright 2010 Mark Waterous (mark@watero.us)
@@ -22,7 +22,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-define( 'WPBITLY_VERSION', '0.1.7' );
+
+define( 'WPBITLY_VERSION', '0.1.8' );
 
 register_uninstall_hook( __FILE__, 'wpbitly_uninstall' );
 
@@ -69,7 +70,7 @@ add_filter( 'plugin_action_links', 'wpbitly_filter_plugin_actions', 10, 2 );
 add_shortcode( 'wpbitly', 'wpbitly_shortcode' );
 
 // WordPress 3.0!
-add_filter( 'pre_get_shortlink', 'wpbitly_filter_shortlink' );
+add_filter( 'get_shortlink', 'wpbitly_filter_shortlink', 10, 3 );
 
 /**
  * @deprecated
@@ -220,10 +221,30 @@ function wpbitly_get_shortlink( $pid )
  * @todo This seems cluttered having so many methods to grab one shortlink - is it?
  */
 
-function wpbitly_filter_shortlink()
+function wpbitly_filter_shortlink( $shortlink, $id, $context )
 {
 	global $post;
-	return wpbitly_get_shortlink( $post->ID );
+
+	// Look for the post ID passed by wp_get_shortlink() first
+	if ( empty( $id ) )
+	{
+		$id = $post->ID;
+	}
+
+	// Fall back in case we still don't have a post ID
+	if ( empty( $id ) )
+	{
+		// Maybe we got passed a shortlink already? Better to return something than nothing.
+		// Some wacky test cases might help us polish this up.
+		if ( ! empty( $shortlink ) )
+			return $shortlink;
+
+		return false;
+
+	}
+
+	return wpbitly_get_shortlink( $id );
+
 }
 
 
