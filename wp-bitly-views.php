@@ -1,7 +1,7 @@
 <?php
 
 add_action( 'admin_menu', 'wpbitly_add_pages' );
-add_action( 'admin_menu', 'wpbitly_add_metaboxes' );
+add_action( 'admin_head', 'wpbitly_add_metaboxes' );
 
 
 function wpbitly_add_pages()
@@ -15,7 +15,7 @@ function wpbitly_add_pages()
 function wpbitly_print_styles()
 {
 	wp_enqueue_style( 'dashboard' );
-	wp_enqueue_style( 'wpbitly', get_stylesheet_directory_uri().'/assets/wpbitly.css', false, WPBITLY_VERSION, 'screen' );
+	wp_enqueue_style( 'wpbitly', plugins_url( '', __FILE__ ).'/assets/wpbitly.css', false, WPBITLY_VERSION, 'screen' );
 }
 
 
@@ -28,38 +28,109 @@ function wpbitly_print_scripts()
 
 function wpbitly_add_metaboxes()
 {
-	add_meta_box( 'wpbitly_stats', 'WP Bit.ly', 'wpbitly_build_metabox', 'post', 'side' );
+	global $post;
+
+	if ( is_object( $post ) )
+	{
+
+/*		$shortlink = get_post_meta( $post->ID, '_wpbitly', true );
+
+		if ( empty( $shortlink ) )
+			return;*/
+
+		add_meta_box( 'wpbitly-meta', 'WP Bit.ly', 'wpbitly_build_metabox', 'post', 'side' );
+
+	}
+
 }
 
+
+/**
+ * Do we let people set their own/update their own? It would have to automatically set an override of the generation as
+ * this checks against the Bit.ly API to see if the shortlink is valid.
+
+function wpbitly_add_metaboxes()
+{
+	global $wpbitly;
+
+	if ( empty( $wpbitly->options['post_types'] ) || ! is_array( $wpbitly->options['post_types'] ) )
+		return;
+
+	foreach ( $wpbitly->options['post_types'] as $post_type )
+	{
+		add_meta_box( 'wpbitly_stats', 'WP Bit.ly', 'wpbitly_build_metabox', $post_type, 'side' );
+	}
+
+	add_action( 'save_post', 'wpbitly_save_meta' );
+
+}
+*/
+
+
+function wpbitly_save_meta( $post_id )
+{
+
+	if ( ! wp_verify_nonce( $_POST['wpbitly_nonce'], __FILE__ ) )
+		return $post_id;
+
+	/** @todo This needs to be updated to take into account capabilities set by any custom post type that is being used by WP Bit.ly */
+	if ( $POST['post_type'] == 'page' )
+	{
+		if ( ! current_user_can( 'edit_page', $post_id ) )
+			return $post_id;
+	}
+	else
+	{
+		if ( ! current_user_can( 'edit_post', $post_id ) )
+			return $post_id;
+	}
+
+	$data = get_post_meta( $post_id, '_wpbitly', true );
+	$new = trim( $_POST['_wpbitly'] );
+
+	if ( ! empty( $data ) )
+	{
+		if ( is_null( $new ) )
+		{
+			delete_post_meta( $post_id, '_wpbitly' );
+		}
+		else
+		{
+			update_post_meta( $post_id, '_wpbitly', $new );
+		}
+	}
+	else if ( ! is_null( $new ) )
+	{
+		/** @todo There is an almost certainty that this will be overwritten by the generation validation check. Maybe a checkbox to override? */
+		add_post_meta( $post_id, '_wpbitly', $new, true );
+	}
+
+	return $post_id;
+
+}
 
 function wpbitly_build_metabox()
 {
 	global $wpbitly, $post;
-pr( $post );
-var_dump( wp_is_post_revision( $post->ID ) );
-	$wpbitly_link = get_post_meta( $post->ID, '_wpbitly', true );
-var_dump( $wpbitly_link );
-	echo '<div class="ajaxtag"><label class="screen-reader-text" for="new-tag-post_tag">WP Bit.ly</label>';
-	echo '<div class="taghint">Add Bit.ly Shortlink</div>';
-	echo '<p><input type="text" id="wpbitly-shortlink" name="wpbitly[link]" class="newtag form-input-tip" size="24" autocomplete="off" value="" style="margin-right: 4px;" />';
-	echo '<input type="button" class="button" value="Update" tabindex="3" /></p></div>';
 
+	$shortlink = get_post_meta( $post->ID, '_wpbitly', true );
 
-	if ( ! $wpbitly_link )
-		return;
+	echo '<label class="screen-reader-text" for="new-tag-post_tag">WP Bit.ly</label>';
+	echo '<p style="margin-top: 8px;"><input type="text" id="wpbitly-shortlink" name="_wpbitly" size="32" autocomplete="off" value="'.$shortlink.'" style="margin-right: 4px; color: #aaa;" /></p>';
 
 	$url = sprintf( $wpbitly->url['clicks'], $wpbitly_link, $wpbitly->options['bitly_username'], $wpbitly->options['bitly_api_key'] );
 	$bitly_response = wpbitly_curl( $url );
 
+	echo '<h4 style="margin-left: 4px; margin-right: 4px; padding-bottom: 3px; border-bottom: 4px solid #eee;">Shortlink Stats</h4>';
+
 	if ( is_array( $bitly_response ) && $bitly_response['status_code'] == 200 )
 	{
-		echo '<p>Statistics for the short link associated with this article;</p>';
 		echo "<p>Global Clicks: <strong>{$bitly_response['data']['clicks'][0]['global_clicks']}</strong><br/>";
 		echo "<p>User Clicks: <strong>{$bitly_response['data']['clicks'][0]['user_clicks']}</strong></p>";
 	}
 	else
 	{
-		echo '<p>There was a problem retrieving statistics from Bit.ly.</p>';
+		echo '<p class="error" style="padding: 4px;">There was a problem retrieving stats!</p>';
 	}
 
 }
@@ -123,7 +194,15 @@ function wpbitly_postbox_options()
 	{
 		if ( ! in_array( $pt, $exclude_types ) )
 		{
-			$checkboxes[] = '<input name="wpbitly_options[post_types]" type="checkbox" value="'.$pt.'" '.checked( $pt, $wpbitly->options['post_types'], false ).' /><span>'.ucwords( str_replace( '_', ' ', $pt ) ).'</span><br />';
+			$checked = false;
+
+			if ( in_array( $pt, $wpbitly->options['post_types'] ) )
+			{
+				$checked = $pt;
+			}
+
+			$checkboxes[] = '<input name="wpbitly_options[post_types][]" type="checkbox" value="'.$pt.'" '.checked( $pt, $checked, false ).' /><span>'.ucwords( str_replace( '_', ' ', $pt ) ).'</span><br />';
+
 		}
 	}
 

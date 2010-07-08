@@ -12,11 +12,31 @@ function wpbitly_options_init()
 function wpbitly_options_validate( $options )
 {
 	global $wpbitly;
-return $options;
+
+	function clean( $options )
+	{
+
+		foreach ( $options as $k => $v )
+		{
+
+			if ( is_array( $v ) )
+			{
+				$options[$k] = clean( $v );
+			}
+			else
+			{
+				$options[$k] = trim( esc_attr( urlencode( $v ) ) );
+			}
+
+		}
+
+		return $options;
+
+	}
+
 	$valid = false;
 
-	foreach ( $options as $key => $value )
-		$options[$key] = trim( esc_attr( urlencode( $value ) ) );
+	$options = clean( $options );
 
 	if ( ! empty( $options['bitly_username'] ) && ! empty( $options['bitly_api_key'] ) ) {
 
