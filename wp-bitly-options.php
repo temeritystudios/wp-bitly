@@ -12,7 +12,7 @@ function wpbitly_options_init()
 function wpbitly_options_validate( $options )
 {
 	global $wpbitly;
-
+return $options;
 	$valid = false;
 
 	foreach ( $options as $key => $value )
@@ -27,6 +27,11 @@ function wpbitly_options_validate( $options )
 		if ( is_array( $wpbitly_validate ) && $wpbitly_validate['data']['valid'] == 1 )
 			$valid = true;
 
+	}
+
+	if ( ! isset( $options['post_types'] ) )
+	{
+		$options['post_types'] = array();
 	}
 
 	if ( $valid === true )
@@ -53,10 +58,12 @@ class wpbitly_options
 
 	public function __construct( array $defaults )
 	{
+
 		$this->_get_version();
 		$this->_refresh_options( $defaults );
 
 		add_action( 'init', array( $this, 'check_options' ) );
+
 	}
 
 
@@ -85,7 +92,7 @@ class wpbitly_options
 		}
 		else if ( is_array( $options ) )
 		{
-			$diff = array_diff_assoc( $defaults, $options );
+			$diff = array_diff_key( $defaults, $options );
 
 			if ( ! empty( $diff ) )
 			{
