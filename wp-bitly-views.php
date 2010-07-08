@@ -278,10 +278,13 @@ function wpbitly_postbox_generate()
 		{
 			$output .= '<div class="error"><p>' . $status . __( 'You must configure your username and API key first!', 'wpbitly' ) . '</p></div>';
 		}
-		else if ( in_array( $generate, array( 'post', 'page', 'any' ) ) )
+		else
 		{
 
-			$posts = get_posts( "numberposts=-1&post_type={$generate}" );
+			$posts = get_posts( array(
+				'numberposts' => '-1',
+				'post_type'   => $generate,
+			) );
 
 			foreach ( $posts as $the )
 			{
