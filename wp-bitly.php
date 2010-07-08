@@ -43,7 +43,7 @@ $wpbitly = new wpbitly_options(
 	array(
 		'bitly_username' => '',
 		'bitly_api_key'  => '',
-		'post_types'     => 'any',
+		'post_types'     => array( 'post', 'page' ),
 	)
 );
 
@@ -272,4 +272,24 @@ function wpbitly_curl( $url )
 
 	return false;
 
+}
+
+
+
+
+// DEBUG, TO BE REMOVED
+
+function pr( $var )
+{
+	echo '<pre>'.print_r( $var, true ).'</pre>';
+}
+
+function prd( $var )
+{
+	echo '<pre>'.print_r( $var, true ).'</pre>'; die;
+}
+
+function vrd( $var )
+{
+	echo '<pre>'; var_dump( $var ); echo '</pre>'; die;
 }

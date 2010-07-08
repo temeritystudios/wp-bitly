@@ -29,9 +29,6 @@ function wpbitly_options_validate( $options )
 
 	}
 
-	if ( ! in_array( $options['post_types'], array( 'post', 'page', 'any' ) ) )
-		$options['post_types'] = 'any';
-
 	if ( $valid === true )
 		delete_option( 'wpbitly_invalid' );
 	else
@@ -58,6 +55,8 @@ class wpbitly_options
 	{
 		$this->_get_version();
 		$this->_refresh_options( $defaults );
+
+		add_action( 'init', array( $this, 'check_options' ) );
 	}
 
 
@@ -95,26 +94,54 @@ class wpbitly_options
 			}
 		}
 
-		if ( empty( $options['bitly_username'] ) || empty( $options['bitly_api_key'] ) )
-			add_action( 'admin_notices', array( $this, 'notice_setup' ) );
-
-		if ( get_option( 'wpbitly_invalid' ) !== false && isset( $_GET['page'] ) && $_GET['page'] == 'wpbitly' )
-			add_action( 'admin_notices', array( $this, 'notice_invalid' ) );
-
 		$this->options = $options;
+
+	}
+
+
+	public function check_options()
+	{
+
+		// Display any necessary administrative notices
+		if ( current_user_can( 'edit_posts' ) )
+		{
+			if ( empty( $this->options['bitly_username'] ) || empty( $this->options['bitly_api_key'] ) )
+			{
+				if ( ! isset( $_GET['page'] ) || $_GET['page'] != 'wpbitly' )
+				{
+				add_action( 'admin_notices', array( $this, 'notice_setup' ) );
+				}
+			}
+
+			if ( get_option( 'wpbitly_invalid' ) !== false && isset( $_GET['page'] ) && $_GET['page'] == 'wpbitly' )
+			{
+				add_action( 'admin_notices', array( $this, 'notice_invalid' ) );
+			}
+		}
 
 	}
 
 
 	public function notice_setup()
 	{
-		return $this->display_notice( '<strong>' . __( 'WP Bit.Ly is almost ready!', 'wpbitly' ) . '</strong> ' . sprintf( __( 'Please visit the %1 to configure WP Bit.ly', 'wpbitly' ), '<a href="options.php?page=wpbitly">' . __( 'Settings Page', 'wpbitly' ) . '</a>' ), 'error' );
+
+		$title = __( 'WP Bit.Ly is almost ready!', 'wpbitly' );
+		$settings_link = '<a href="options-general.php?page=wpbitly">'.__( 'settings page', 'wpbitly' ).'</a>';
+		$message = sprintf( __( 'Please visit the %s to configure WP Bit.ly', 'wpbitly' ), $settings_link );
+
+		return $this->display_notice( "<strong>{$title}</strong> {$message}", 'error' );
+
 	}
 
 
 	public function notice_invalid()
 	{
-		return $this->display_notice( '<strong>' . __( 'Invalid API Key;', 'wpbitly' ) . '</strong> ' . __( 'Your username and API key for bit.ly can\'t be validated. All features of WP Bit.ly are temporarily disabled.', 'wpbitly' ), 'error' );
+
+		$title = __( 'Invalid API Key!', 'wpbitly' );
+		$message = __( "Your username and API key for bit.ly can't be validated. All features are temporarily disabled.", 'wpbitly' );
+
+		return $this->display_notice( "<strong>{$title}</strong> {$message}", 'error' );
+
 	}
 
 

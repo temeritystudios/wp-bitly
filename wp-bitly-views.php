@@ -7,7 +7,7 @@ add_action( 'admin_menu', 'wpbitly_statistics_metabox' );
 function wpbitly_add_pages()
 {
 
-	$hook = add_options_page( 'WP Bit.ly Options', 'WP Bit.ly Options', 8, 'wpbitly', 'wpbitly_display' );
+	$hook = add_options_page( 'WP Bit.ly Options', 'WP Bit.ly', 'edit_posts', 'wpbitly', 'wpbitly_display' );
 		add_action( 'admin_print_styles-' . $hook, 'wpbitly_print_styles' ); 
 		add_action( 'admin_print_scripts-' . $hook, 'wpbitly_print_scripts' ); 
 
@@ -76,6 +76,7 @@ function wpbitly_display()
 	echo '<h2 style="margin-bottom: 1em;">' . __( 'WP Bit.ly Options', 'wpbitly' ) . '</h2>';
 
 ?>
+
 	<div class="postbox-container" style="width: 70%;">
 	<div class="metabox-holder">	
 	<div class="meta-box-sortables">
@@ -111,33 +112,49 @@ function wpbitly_postbox_options()
 {
 	global $wpbitly;
 
+	$exclude_types = array(
+		'revision',
+		'nav_menu_item',
+	);
+
+	$post_types = get_post_types();
+
+	$checkboxes = array();
+
+	foreach ( $post_types as $pt )
+	{
+		if ( ! in_array( $pt, $exclude_types ) )
+		{
+			$checkboxes[] = '<input name="wpbitly_options[post_types]" type="checkbox" value="'.$pt.'" '.checked( $pt, $wpbitly->options['post_types'], false ).' /><span>'.ucwords( str_replace( '_', ' ', $pt ) ).'</span><br />';
+		}
+	}
+
+
 	$options = array();
 
 	$options[] = array(
 		'id'    => 'bitly_username',
 		'name'  => __( 'Bit.ly Username:', 'wpbitly' ),
 		'desc'  => __( 'The username you use to log in to your Bit.ly account.', 'wpbitly' ),
-		'input' => '<input name="wpbitly_options[bitly_username]" type="text" value="' . $wpbitly->options['bitly_username'] . '" />'
+		'input' => '<input name="wpbitly_options[bitly_username]" type="text" value="'.$wpbitly->options['bitly_username'].'" />'
 	);
 
 	$options[] = array(
 		'id'    => 'bitly_api_key',
 		'name'  => __( 'Bit.ly API Key:', 'wpbitly' ),
-		'desc'  => sprintf( __( 'Your API key can be found on your %1$s', 'wpbitly' ), '<a href="http://bit.ly/account/" target="_blank">' . __( 'Bit.ly account page', 'wpbitly' ) . '</a>' ),
-		'input' => '<input name="wpbitly_options[bitly_api_key]" type="text" value="' . $wpbitly->options['bitly_api_key'] . '" />'
+		'desc'  => sprintf( __( 'Your API key can be found on your %1$s', 'wpbitly' ), '<a href="http://bit.ly/account/" target="_blank">'.__( 'Bit.ly account page', 'wpbitly' ).'</a>' ),
+		'input' => '<input name="wpbitly_options[bitly_api_key]" type="text" value="'.$wpbitly->options['bitly_api_key'] . '" />'
 	);
 
 	$options[] = array(
 		'id'    => 'post_types',
 		'name'  => __( 'Post Types:', 'wpbitly' ),
 		'desc'  => __( 'What kind of posts should short links be generated for?', 'wpbitly' ),
-		'input' => '<input name="wpbitly_options[post_types]" type="radio" value="post" ' . checked( 'post', $wpbitly->options['post_types'], false ) . ' /><span>' . __( 'Posts', 'wpbitly' ) . '</span>' .
-				   '<input name="wpbitly_options[post_types]" type="radio" value="page" ' . checked( 'page', $wpbitly->options['post_types'], false ) . ' /><span>' . __( 'Pages', 'wpbitly' ) . '</span>' .
-				   '<input name="wpbitly_options[post_types]" type="radio" value="any" ' . checked( 'any', $wpbitly->options['post_types'], false ) . ' /><span>' . __( 'All', 'wpbitly' ) . '</span>'
-	);
+		'input' => implode( "\n", $checkboxes ),
+  	);
 
 	$output  = '<div class="intro">';
-	$output .= '<p>' . __( 'Use the following options to configure your Bit.ly API access and determine the general operation of the WP Bit.ly plugin.', 'wpbitly' ) . '</p>';
+	$output .= '<p>' . __( 'Use the following options to configure your Bit.ly API access and determine the general operation of the WP Bit.ly plugin.', 'wpbitly' ).'</p>';
 	$output .= '</div>';
 
 	$output .= wpbitly_build_form( $options );
