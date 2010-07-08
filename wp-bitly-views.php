@@ -1,23 +1,21 @@
 <?php
 
 add_action( 'admin_menu', 'wpbitly_add_pages' );
-add_action( 'admin_menu', 'wpbitly_statistics_metabox' );
+add_action( 'admin_menu', 'wpbitly_add_metaboxes' );
 
 
 function wpbitly_add_pages()
 {
-
 	$hook = add_options_page( 'WP Bit.ly Options', 'WP Bit.ly', 'edit_posts', 'wpbitly', 'wpbitly_display' );
-		add_action( 'admin_print_styles-' . $hook, 'wpbitly_print_styles' ); 
-		add_action( 'admin_print_scripts-' . $hook, 'wpbitly_print_scripts' ); 
-
+		add_action( 'admin_print_styles-'.$hook, 'wpbitly_print_styles' ); 
+		add_action( 'admin_print_scripts-'.$hook, 'wpbitly_print_scripts' ); 
 }
 
 
 function wpbitly_print_styles()
 {
 	wp_enqueue_style( 'dashboard' );
-	wp_enqueue_style( 'wpbitly', plugins_url( '', __FILE__ ) . '/assets/wpbitly.css', false, WPBITLY_VERSION, 'screen' );
+	wp_enqueue_style( 'wpbitly', get_stylesheet_directory_uri().'/assets/wpbitly.css', false, WPBITLY_VERSION, 'screen' );
 }
 
 
@@ -28,24 +26,24 @@ function wpbitly_print_scripts()
 }
 
 
-function wpbitly_statistics_metabox()
+function wpbitly_add_metaboxes()
 {
-	global $post;
-
-	if ( is_object( $post ) && get_post_meta( $post->ID, '_wpbitly', true ) )
-	{
-		add_meta_box( 'wpbitly_stats', 'WP Bit.ly Statistics', 'wpbitly_build_statistics_metabox', 'page', 'side' );
-		add_meta_box( 'wpbitly_stats', 'WP Bit.ly Statistics', 'wpbitly_build_statistics_metabox', 'post', 'side' );
-	}
-
+	add_meta_box( 'wpbitly_stats', 'WP Bit.ly', 'wpbitly_build_metabox', 'post', 'side' );
 }
 
 
-function wpbitly_build_statistics_metabox()
+function wpbitly_build_metabox()
 {
 	global $wpbitly, $post;
-
+pr( $post );
+var_dump( wp_is_post_revision( $post->ID ) );
 	$wpbitly_link = get_post_meta( $post->ID, '_wpbitly', true );
+var_dump( $wpbitly_link );
+	echo '<div class="ajaxtag"><label class="screen-reader-text" for="new-tag-post_tag">WP Bit.ly</label>';
+	echo '<div class="taghint">Add Bit.ly Shortlink</div>';
+	echo '<p><input type="text" id="wpbitly-shortlink" name="wpbitly[link]" class="newtag form-input-tip" size="24" autocomplete="off" value="" style="margin-right: 4px;" />';
+	echo '<input type="button" class="button" value="Update" tabindex="3" /></p></div>';
+
 
 	if ( ! $wpbitly_link )
 		return;

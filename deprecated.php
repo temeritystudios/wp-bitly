@@ -29,19 +29,19 @@ function wpbitly_shortlink_wp_head() {
 
 /**
  * This function is used to return the Bit.ly shortlink for a specific post.
- * If $pid is not supplied, attempt to retrieve it from the global namespace.
+ * If $post_id is not supplied, attempt to retrieve it from the global namespace.
  *
- * @param $pid int The WordPress post ID to be used.
+ * @param $post_id int The WordPress post ID to be used.
  */
 
-function wpbitly_get_shortlink( $pid )
+function wpbitly_get_shortlink( $post_id )
 {
 	global $post;
 
-	if ( empty( $pid ) && ! $pid = $post->ID )
+	if ( empty( $post_id ) && ! $post_id = $post->ID )
 		return false;
 
-	return get_post_meta( $pid, '_wpbitly', true );
+	return get_post_meta( $post_id, '_wpbitly', true );
 
 }
 
@@ -54,18 +54,18 @@ function wpbitly_get_shortlink( $pid )
  *
  * @param $text string The text to display as the content of the link. Defaults to the link itself.
  * @param $echo bool   Whether to echo the result or return it. Defaults to true (echo).
- * @param $pid  int    The WordPress post ID to be used. Defaults to $post->ID if it can.
+ * @param $post_id  int    The WordPress post ID to be used. Defaults to $post->ID if it can.
  */
  
-function wpbitly_print( $text = '', $echo = true, $pid = '' )
+function wpbitly_print( $text = '', $echo = true, $post_id = '' )
 {
 	global $post;
 
 	// Attempt to get the post ID
-	if ( empty( $pid ) && ! $pid = $post->ID )
+	if ( empty( $post_id ) && ! $post_id = $post->ID )
 		return;
 
-	$wpbitly_link = wpbitly_get_shortlink( $pid );
+	$wpbitly_link = wpbitly_get_shortlink( $post_id );
 
 	if ( empty( $text ) )
 	{
@@ -94,6 +94,6 @@ function wpbitly_shortcode( $atts )
 
 	extract( shortcode_atts( array( 'text' => '', 'pid' => $post->ID ), $atts ) );
 
-	return wpbitly_print( $text, false, $pid );
+	return wpbitly_print( $text, false, $post_id );
 
 }

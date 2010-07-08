@@ -51,10 +51,13 @@ class wpbitly_options
 
 	public $options;
 
-	public $url = array( 'shorten'  => 'http://api.bit.ly/v3/shorten?login=%s&apiKey=%s&uri=%s&format=json',
-						 'expand'   => 'http://api.bit.ly/v3/expand?shortUrl=%s&login=%s&apiKey=%s&format=json',
-						 'validate' => 'http://api.bit.ly/v3/validate?x_login=%s&x_apiKey=%s&login=wpbitly&apiKey=R_bfef36d10128e7a2de09637a852c06c3&format=json',
-						 'clicks'   => 'http://api.bit.ly/v3/clicks?shortUrl=%s&login=%s&apiKey=%s&format=json' );
+	public $url = array(
+		'shorten'  => 'http://api.bit.ly/v3/shorten?login=%s&apiKey=%s&uri=%s&format=json',
+		'expand'   => 'http://api.bit.ly/v3/expand?shortUrl=%s&login=%s&apiKey=%s&format=json',
+		'validate' => 'http://api.bit.ly/v3/validate?x_login=%s&x_apiKey=%s&login=wpbitly&apiKey=R_bfef36d10128e7a2de09637a852c06c3&format=json',
+		'clicks'   => 'http://api.bit.ly/v3/clicks?shortUrl=%s&login=%s&apiKey=%s&format=json',
+	);
+
 
 	public function __construct( array $defaults )
 	{
@@ -172,7 +175,7 @@ class wpbitly_options
 abstract class wpbitly_post
 {
 
-	private static $pid;
+	private static $post_id;
 
 	private static $permalink = array();
 
@@ -182,12 +185,12 @@ abstract class wpbitly_post
 	public static function id()
 	{
 
-		if ( ! self::$pid )
+		if ( ! self::$post_id )
 		{
 			self::_get_post_id();
 		}
 
-		return self::$pid;
+		return self::$post_id;
 
 	}
 
@@ -232,11 +235,11 @@ abstract class wpbitly_post
 			trigger_error( 'wpbitly::id() cannot be called before $post is set in the global namespace.', E_USER_ERROR );
 		}
 
-		self::$pid = $post->ID;
+		self::$post_id = $post->ID;
 
-		if ( $parent = wp_is_post_revision( self::$pid ) )
+		if ( $parent = wp_is_post_revision( self::$post_id ) )
 		{
-			self::$pid = $parent;
+			self::$post_id = $parent;
 		}
 
 	}
@@ -250,7 +253,7 @@ abstract class wpbitly_post
 			self::$permalink = array();
 		}
 
-		self::$permalink['raw']     = get_permalink( self::$pid );
+		self::$permalink['raw']     = get_permalink( self::$post_id );
 		self::$permalink['encoded'] = urlencode( self::$permalink['raw'] );
 
 	}
@@ -258,7 +261,7 @@ abstract class wpbitly_post
 
 	private static function _get_shortlink()
 	{
-		self::$shortlink = get_post_meta( self::$pid, '_wpbitly', true );
+		self::$shortlink = get_post_meta( self::$post_id, '_wpbitly', true );
 	}
 
 }

@@ -60,7 +60,7 @@ if ( function_exists( 'wpme_shortlink_header' ) )
 // Automatic generation is disabled if the API information is invalid
 if ( ! get_option( 'wpbitly_invalid' ) )
 {
-	add_action( 'save_post', 'wpbitly_generate_shortlink' );
+	add_action( 'save_post', 'wpbitly_generate_shortlink', 10, 2 );
 }
 
 
@@ -129,42 +129,54 @@ function wpbitly_filter_plugin_actions( $links, $file )
 
 
 /**
- * Generates the shortlink for any post specified by $pid. This parameter
+ * Generates the shortlink for any post specified by $post_id. This parameter
  * should be passed automatically by any behind the scenes operations such
  * as mass generation or wp_insert_post
  *
- * @param $pid int  The WordPress post ID to be used.
- * @param $ret bool True if the link should be returned, false to update silently
+ * @param $post_id int  The WordPress post ID to be used.
  *
  * @todo If a link is found for a specific post, we should check it against Bit.ly's API to ensure it's still valid. If not, regenerate.
  */
 
-function wpbitly_generate_shortlink( $pid, $ret = true )
+function wpbitly_generate_shortlink( $post_id, $post )
 {
 	global $wpbitly;
 
-	if ( $parent = wp_is_post_revision( $pid ) )
+	// If this information hasn't been filled out, there's no need to go any further.
+	if ( empty( $wpbitly->options['bitly_username'] ) || empty( $wpbitly->options['bitly_api_key'] ) || get_option( 'wpbitly_invalid' ) )
+		return;
+
+
+	// Do we need to generate a shortlink for this post? (save_post is fired when revisions, auto-drafts, et al are saved)
+	if ( $parent = wp_is_post_revision( $post_id ) )
 	{
-		$pid = $parent;
+		$post_id = $parent;
 	}
 
+	$post = get_post( $post_id );
+
+	if ( $post->post_status != 'publish' )
+		return;
+
+	$post_id = $post->ID;
+
+
 	// Link to be generated
-	$permalink = get_permalink( $pid );
-	$wpbitly_link = get_post_meta( $pid, '_wpbitly', true );
+	$permalink = get_permalink( $post_id );
+	$wpbitly_link = get_post_meta( $post_id, '_wpbitly', true );
 
-
-	if ( empty( $wpbitly->options['bitly_username'] ) || empty( $wpbitly->options['bitly_api_key'] ) || get_option( 'wpbitly_invalid' ) )
-		return false;
 
 	if ( $wpbitly_link != false )
 	{
-		$url = sprintf( $wpbitly->expand, $wpbitly_link, $wpbitly->options['bitly_username'], $wpbitly->options['bitly_api_key'] );
+		$url = sprintf( $wpbitly->url['expand'], $wpbitly_link, $wpbitly->options['bitly_username'], $wpbitly->options['bitly_api_key'] );
 		$bitly_response = wpbitly_curl( $url );
 
+		// If we have a shortlink for this post already, we've sent it to the Bit.ly expand API to verify that it will actually forward to this posts permalink
 		if ( is_array( $bitly_response ) && $bitly_response['status_code'] == 200 && $bitly_response['data']['expand'][0]['long_url'] == $permalink )
 			return false;
 
-		delete_post_meta( $pid, '_wpbitly' );
+		// The expanded URLs don't match, so we can delete and regenerate
+		delete_post_meta( $post_id, '_wpbitly' );
 	}
 
 	// Submit to Bit.ly API and look for a response
@@ -174,13 +186,10 @@ function wpbitly_generate_shortlink( $pid, $ret = true )
 	// Success?
 	if ( is_array( $bitly_response ) && $bitly_response['status_code'] == 200 )
 	{
-		update_post_meta( $pid, '_wpbitly', $bitly_response['data']['url'] );
+		update_post_meta( $post_id, '_wpbitly', $bitly_response['data']['url'] );
 	}
 
 }
-
-
-
 
 
 /**
