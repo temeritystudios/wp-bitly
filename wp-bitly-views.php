@@ -22,7 +22,7 @@ function wpbitly_print_styles()
 function wpbitly_print_scripts()
 {
 	wp_enqueue_script( 'dashboard' );
-	wp_enqueue_script( 'jquery-validate', 'http://dev.jquery.com/view/trunk/plugins/validate/jquery.validate.js', 'jQuery', false, true );
+//	wp_enqueue_script( 'jquery-validate', 'http://dev.jquery.com/view/trunk/plugins/validate/jquery.validate.js', 'jQuery', false, true );
 }
 
 
@@ -33,92 +33,31 @@ function wpbitly_add_metaboxes()
 	if ( is_object( $post ) )
 	{
 
-/*		$shortlink = get_post_meta( $post->ID, '_wpbitly', true );
+		/** We can't use this until 3.1 and we're sure the majority of users have at least 3.0
+		$shortlink = wp_get_shortlink( $post->ID );
+		*/
+		$shortlink = get_post_meta( $post->ID, '_wpbitly', true );
 
 		if ( empty( $shortlink ) )
-			return;*/
+			return;
 
-		add_meta_box( 'wpbitly-meta', 'WP Bit.ly', 'wpbitly_build_metabox', 'post', 'side' );
+		add_meta_box( 'wpbitly-meta', 'WP Bit.ly', 'wpbitly_build_metabox', $post->post_type, 'side', 'default', array( $shortlink ) );
 
 	}
 
 }
 
 
-/**
- * Do we let people set their own/update their own? It would have to automatically set an override of the generation as
- * this checks against the Bit.ly API to see if the shortlink is valid.
-
-function wpbitly_add_metaboxes()
+function wpbitly_build_metabox( $post, $args )
 {
 	global $wpbitly;
 
-	if ( empty( $wpbitly->options['post_types'] ) || ! is_array( $wpbitly->options['post_types'] ) )
-		return;
-
-	foreach ( $wpbitly->options['post_types'] as $post_type )
-	{
-		add_meta_box( 'wpbitly_stats', 'WP Bit.ly', 'wpbitly_build_metabox', $post_type, 'side' );
-	}
-
-	add_action( 'save_post', 'wpbitly_save_meta' );
-
-}
-*/
-
-
-function wpbitly_save_meta( $post_id )
-{
-
-	if ( ! wp_verify_nonce( $_POST['wpbitly_nonce'], __FILE__ ) )
-		return $post_id;
-
-	/** @todo This needs to be updated to take into account capabilities set by any custom post type that is being used by WP Bit.ly */
-	if ( $POST['post_type'] == 'page' )
-	{
-		if ( ! current_user_can( 'edit_page', $post_id ) )
-			return $post_id;
-	}
-	else
-	{
-		if ( ! current_user_can( 'edit_post', $post_id ) )
-			return $post_id;
-	}
-
-	$data = get_post_meta( $post_id, '_wpbitly', true );
-	$new = trim( $_POST['_wpbitly'] );
-
-	if ( ! empty( $data ) )
-	{
-		if ( is_null( $new ) )
-		{
-			delete_post_meta( $post_id, '_wpbitly' );
-		}
-		else
-		{
-			update_post_meta( $post_id, '_wpbitly', $new );
-		}
-	}
-	else if ( ! is_null( $new ) )
-	{
-		/** @todo There is an almost certainty that this will be overwritten by the generation validation check. Maybe a checkbox to override? */
-		add_post_meta( $post_id, '_wpbitly', $new, true );
-	}
-
-	return $post_id;
-
-}
-
-function wpbitly_build_metabox()
-{
-	global $wpbitly, $post;
-
-	$shortlink = get_post_meta( $post->ID, '_wpbitly', true );
+	$shortlink = $args['args'][0];
 
 	echo '<label class="screen-reader-text" for="new-tag-post_tag">WP Bit.ly</label>';
 	echo '<p style="margin-top: 8px;"><input type="text" id="wpbitly-shortlink" name="_wpbitly" size="32" autocomplete="off" value="'.$shortlink.'" style="margin-right: 4px; color: #aaa;" /></p>';
 
-	$url = sprintf( $wpbitly->url['clicks'], $wpbitly_link, $wpbitly->options['bitly_username'], $wpbitly->options['bitly_api_key'] );
+	$url = sprintf( $wpbitly->url['clicks'], $shortlink, $wpbitly->options['bitly_username'], $wpbitly->options['bitly_api_key'] );
 	$bitly_response = wpbitly_curl( $url );
 
 	echo '<h4 style="margin-left: 4px; margin-right: 4px; padding-bottom: 3px; border-bottom: 4px solid #eee;">Shortlink Stats</h4>';
@@ -272,7 +211,6 @@ function wpbitly_postbox_generate()
 	{
 
 		$generate = $wpbitly->options['post_types'];
-		$status = '<strong>' . __( 'Generate Short Links:', 'wpbitly' ) . '</strong> ';
 
 		if ( empty( $wpbitly->options['bitly_username'] ) || empty( $wpbitly->options['bitly_api_key'] ) || get_option( 'wpbitly_invalid' ) )
 		{
@@ -294,7 +232,7 @@ function wpbitly_postbox_generate()
 				}
 			}
 
-			$output .= '<div class="updated fade"><p>' . $status . __( 'Short links have been generated for the selected post type!', 'wpbitly' ) . '</p></div>';
+			$output .= '<div class="updated fade"><p style="font-weight: 700;">'.__( 'Short links have been generated for the selected post type(s)!', 'wpbitly' ).'</p></div>';
 
 		} // if ( empty )
 
