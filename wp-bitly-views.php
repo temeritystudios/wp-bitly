@@ -186,7 +186,7 @@ function wpbitly_postbox_support()
 	$output  = '<p>' . __( 'If you require support, or would like to contribute to the further development of this plugin, please choose one of the following;', 'wpbitly' ) . '</p>';
 	$output .= '<ul class="links">';
 	$output .= '<li><a href="http://mark.watero.us/">' . __( 'Author Homepage (Mark)', 'wpbitly' ) . '</a></li>';
-	$output .= '<li><a href="http://www.chipbennett.com/">' . __( 'Author Homepage (Chip)', 'wpbitly' ) . '</a></li>';
+	$output .= '<li><a href="http://www.chipbennett.net/">' . __( 'Author Homepage (Chip)', 'wpbitly' ) . '</a></li>';
 	$output .= '<li><a href="http://mark.watero.us/wordpress-plugins/wp-bitly/">' . __( 'Plugin Homepage', 'wpbitly' ) . '</a></li>';
 	$output .= '<li><a href="http://wordpress.org/extend/plugins/wp-bitly/">' . __( 'Rate This Plugin', 'wpbitly' ) . '</a></li>';
 //	$output .= '<li><a href="http://mark.watero.us/wordpress-plugins/oops/">' . __( 'Bug Reports', 'wpbitly' ) . '</a></li>';
