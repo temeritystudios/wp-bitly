@@ -2,7 +2,7 @@
 Plugin Name: WP Bit.ly
 Plugin URI: http://wordpress.org/extend/wp-bitly/
 Description: WP Bit.ly uses the Bit.ly API to generate short links for all your articles and pages. Visitors can use the link to email, share, or bookmark your pages quickly and easily.
-Version: 0.2.4
+Version: 0.2.5
 Author: <a href="http://mark.watero.us/">Mark Waterous</a> & <a href="http://www.chipbennett.net/">Chip Bennett</a>
 
 Copyright 2010 Mark Waterous (mark@watero.us)
@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 global $wp_version;
 
-define( 'WPBITLY_VERSION', '0.2.4' );
+define( 'WPBITLY_VERSION', '0.2.5' );
 
 register_uninstall_hook( __FILE__, 'wpbitly_uninstall' );
 
