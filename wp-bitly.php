@@ -2,7 +2,7 @@
 Plugin Name: WP Bit.ly
 Plugin URI: http://wordpress.org/extend/wp-bitly/
 Description: WP Bit.ly uses the Bit.ly API to generate short links for all your articles and pages. Visitors can use the link to email, share, or bookmark your pages quickly and easily.
-Version: 0.2.5
+Version: 0.2.6
 Author: <a href="http://mark.watero.us/">Mark Waterous</a> & <a href="http://www.chipbennett.net/">Chip Bennett</a>
 
 Copyright 2010 Mark Waterous (mark@watero.us)
@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 global $wp_version;
 
-define( 'WPBITLY_VERSION', '0.2.5' );
+define( 'WPBITLY_VERSION', '0.2.6' );
 
 register_uninstall_hook( __FILE__, 'wpbitly_uninstall' );
 
@@ -32,9 +32,7 @@ require( 'wp-bitly-options.php' );
 require( 'wp-bitly-views.php' );
 
 if ( ! version_compare( $wp_version, '3.0', '>=' ) )
-{
 	require( 'deprecated.php' );
-}
 
 
 // Load our controller class... it's helpful!
@@ -59,7 +57,7 @@ if ( function_exists( 'wpme_shortlink_header' ) )
 // Automatic generation is disabled if the API information is invalid
 if ( ! get_option( 'wpbitly_invalid' ) )
 {
-	add_action( 'save_post', 'wpbitly_generate_shortlink', 10, 2 );
+	add_action( 'save_post', 'wpbitly_generate_shortlink', 10, 1 );
 }
 
 
@@ -128,22 +126,19 @@ function wpbitly_filter_plugin_actions( $links, $file )
 
 
 /**
- * Generates the shortlink for any post specified by $post_id. This parameter
- * should be passed automatically by any behind the scenes operations such
- * as mass generation or wp_insert_post
- *
- * @param $post_id int  The WordPress post ID to be used.
- *
- * @todo If a link is found for a specific post, we should check it against Bit.ly's API to ensure it's still valid. If not, regenerate.
+ * Generates the shortlink for the post specified by $post_id.
  */
 
-function wpbitly_generate_shortlink( $post_id, $post )
+function wpbitly_generate_shortlink( $post_id )
 {
 	global $wpbitly;
 
+	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )
+		return false;
+
 	// If this information hasn't been filled out, there's no need to go any further.
 	if ( empty( $wpbitly->options['bitly_username'] ) || empty( $wpbitly->options['bitly_api_key'] ) || get_option( 'wpbitly_invalid' ) )
-		return;
+		return false;
 
 
 	// Do we need to generate a shortlink for this post? (save_post is fired when revisions, auto-drafts, et al are saved)
@@ -155,9 +150,7 @@ function wpbitly_generate_shortlink( $post_id, $post )
 	$post = get_post( $post_id );
 
 	if ( $post->post_status != 'publish' )
-		return;
-
-	$post_id = $post->ID;
+		return false;
 
 
 	// Link to be generated
@@ -194,17 +187,15 @@ function wpbitly_generate_shortlink( $post_id, $post )
 /**
  * Return the wpbitly_get_shortlink method to the built in WordPress pre_get_shortlink
  * filter for internal use.
- *
- * @todo This seems cluttered having so many methods to grab one shortlink - is it?
  */
 
 function wpbitly_get_shortlink( $shortlink, $id, $context )
 {
-	global $post;
 
 	// Look for the post ID passed by wp_get_shortlink() first
 	if ( empty( $id ) )
 	{
+		global $post;
 		$id = $post->ID;
 	}
 
@@ -220,14 +211,21 @@ function wpbitly_get_shortlink( $shortlink, $id, $context )
 
 	}
 
-	return get_post_meta( $id, '_wpbitly', true );
+	$shortlink = get_post_meta( $id, '_wpbitly', true );
+
+	if ( $shortlink == false )
+	{
+		wpbitly_generate_shortlink( $id );
+		$shortlink = get_post_meta( $id, '_wpbitly', true );
+	}
+
+	return $shortlink;
 
 }
 
 
 /**
- * Shortcode for WP Bit.ly uses wpbitly_print() and accepts the same
- * arguments with the exception of echo which it has to do by default.
+ * This is merely a wrapper for the shortlink API method the_shortlink()
  */
 
 function wpbitly_shortcode( $atts )
@@ -249,8 +247,10 @@ function wpbitly_shortcode( $atts )
 
 
 /**
- * WP Bit.ly wrapper for cURL - if cURL is not installed, attempts to use
- * file_get_contents instead.
+ * WP Bit.ly wrapper for cURL - this method relies on the ability to use cURL
+ * or file_get_contents. If cURL is not available and allow_url_fopen is set
+ * to false this method will fail and the plugin will not be able to generate
+ * shortlinks.
  */
 
 function wpbitly_curl( $url )
@@ -282,22 +282,3 @@ function wpbitly_curl( $url )
 
 }
 
-
-
-
-// DEBUG, TO BE REMOVED
-
-function pr( $var )
-{
-	echo '<pre>'.print_r( $var, true ).'</pre>';
-}
-
-function prd( $var )
-{
-	echo '<pre>'.print_r( $var, true ).'</pre>'; die;
-}
-
-function vrd( $var )
-{
-	echo '<pre>'; var_dump( $var ); echo '</pre>'; die;
-}
