@@ -4,7 +4,7 @@ Donate Link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: short, link, bitly, url, shortener, social, media, twitter
 Requires at least: 2.9.2
 Tested up to: 3.0
-Stable tag: 0.2.5
+Stable tag: 0.2.6
 
 WP Bit.ly uses the Bit.ly API to generate short links for all of your posts and pages. Statistics are displayed for each link from the dashboard.
 
@@ -34,23 +34,35 @@ Installation of WP Bit.ly is as easy as:
 
 No, WP Bit.ly can do this for you automatically through the options page. Select the type of post you would like to generate short links for, click 'Generate', and WP Bit.ly will take care of the rest!
 
+= What if I have #### posts? Will the bit.ly API limit me? =
+
+At present we have seen the generator perform within the bit.ly rate limits for sites with under 1000 posts - for sites over this, you can still run the generation as bit.ly will not ban you, simply stop you. Any posts that are missed will automatically generate their own short links when they are accessed on the front end (either by visitor, crawler, or other).
+
+= Will the automatic generation slow my site down? =
+
+No, especially since it only occurs once and every access after will use the locally stored shortlink.
+
 = What happens if I change a posts permalink? =
 
 WP Bit.ly validates all short links whenever you update a post, so if you change the permalink or location of the post, your old short link will be replaced with a new one.
 
 = Does WP Bit.ly conform to the HTML/HTTP shortlink specification? =
 
-Thanks to the new WordPress 3.0 Shortlink API, WP Bit.ly conforms with the specification by not only inserting the appropriate meta element in each of your pages, but also the HTTP headers.
+With help from the new WordPress 3.0 Shortlink API, WP Bit.ly conforms with the specification by not only inserting the appropriate meta element in each of your pages, but also the HTTP headers.
 
 = How do I include the short links using WordPress shortcode? =
 
-The WP Bit.ly shortcode for including short links directly in your posts is quite simply [wpbitly]. This shortcode will also accept the same arguments that you can pass to the_shortlink, including 'text', 'title', 'before' and 'after'.
+The WP Bit.ly shortcode for including short links directly in your posts is quite simply [wpbitly]. This shortcode will also accept the same arguments that you can pass to the_shortlink(), including 'text', 'title', 'before' and 'after'.
 
 = How do I include the short links using PHP? =
 
 If you are using WordPress 3.0 (remember to upgrade!) all you have to do is include a call to the_shortlink() anywhere in your theme or plugin. If you are using WordPress 2.9.2 or earlier, there is a function called wpbitly_print() located in deprecated.php that you can use.
 
 == Changelog ==
+
+= 0.2.6 =
+
+* Added support for automatic generation of shortlinks when posts are viewed.
 
 = 0.2.5 =
 * Added support for WordPress 3.0 shortlink API
