@@ -1,6 +1,5 @@
 === Plugin Name ===
 Contributors: mwaterous, chipbennett
-Donate Link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=9847234
 Tags: short, link, bitly, url, shortener, social, media, twitter
 Requires at least: 3.1
 Tested up to: 3.5
@@ -10,11 +9,11 @@ WP Bit.ly uses the Bit.ly API to generate short links for all of your posts and 
 
 == Description ==
 
+UPDATE: This project is underway again and a new stable version tested for 3.8.1 will be available in the very near future.
+
 WP Bit.ly allows you to generate short links using the Bit.ly API for all of your blogs posts and pages.
 
 The generated short links can than be used by you, your visitors and a variety of other services that employ them. Using shortcode or PHP template tags, the short links can than be displayed directly on your pages so that people can use them for bookmarks, email, twitter, or other social media sites to link back to your pages.
-
-Future development will include the ability to use your own domain as the short link (http://yourdomain.com/bXhGjs).
 
 Features of the current version also include the generation of a new meta box on your posts that show you statistics about your link. In addition to a regular statistics plugin you can use this plugin to see who's clicking on your links!
 
