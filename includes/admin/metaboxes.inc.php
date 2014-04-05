@@ -1,20 +1,7 @@
 <?php
-/**
- * Plugin metabox functions
- */
 
-/**
- * Globalize Plugin options
- */
-global $wpbitly_options;
-$wpbitly_options = wpbitly_get_options();
-
-/**
- * Hook Plugin metabox into the edit
- * page for each post for which shortlinks
- * are enabled.
- */
-foreach ( $wpbitly_options['post_types'] as $post_type ) {
+foreach ( $wpbitly_options['post_types'] as $post_type )
+{
 	add_action( 'add_meta_boxes_' . $post_type, 'wpbitly_add_metaboxes' );
 }
 
