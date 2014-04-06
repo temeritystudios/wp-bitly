@@ -1,4 +1,9 @@
-wp-bitly
-========
+# WP Bitly
 
-Whether you're sharing links on social media like Twitter, or sending someone a link from your smart phone, short links make life much easier. WP Bit.ly simplifies the process for you.
+This the GitHub development repository for the WordPress plugin found [here](http://wordpress.org/plugins/wp-bitly/).
+
+Use the Bitly API to generate shortlinks for all of your posts and pages instead of the internal http://www.yourdomain.com/?p=1 short links WordPress generates.
+
+* **Current Version**: 2.0
+* **Latest Stable**: 2.0
+* **Contributors**: [@mwaterous](https://github.com/mwaterous), [@chipbennett](https://github.com/chipbennett)

@@ -5,7 +5,7 @@ Requires at least: 3.8.1
 Tested up to: 3.8.1
 Stable tag: 2.0
 
-Use the Bitly API to generate short links for all of your posts and pages instead of the internal http://www.yourdomain.com/?p=1 links WordPress generates.
+Use the Bitly API to generate shortlinks for all of your posts and pages instead of the internal http://www.yourdomain.com/?p=1 short links WordPress generates.
 
 
 == Description ==
