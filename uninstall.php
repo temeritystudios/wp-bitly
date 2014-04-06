@@ -11,6 +11,12 @@ if ( !defined( 'WP_UNINSTALL_PLUGIN' ) )
 	die;
 
 
+/**
+ * Some people just don't know how cool this plugin is. When they realize
+ * it and come back later, let's make sure they have to start all over.
+ *
+ * @return void
+ */
 function wpbitly_uninstall()
 {
     // Delete associated options
@@ -26,4 +32,5 @@ function wpbitly_uninstall()
 
 }
 
+// G'bye!
 wpbitly_uninstall();

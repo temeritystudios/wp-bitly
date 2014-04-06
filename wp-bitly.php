@@ -51,7 +51,7 @@ define( 'WPBITLY_URL',  plugins_url().'/'.basename( dirname( __FILE__ ) ) );
  * @package wp-bitly
  * @author  Mark Waterous <mark@watero.us>
  */
-class wpbitly
+final class wpbitly
 {
 
     /**
@@ -76,13 +76,13 @@ class wpbitly
      * If you haven't seen a singleton before, visit any Starbucks; they're the ones sitting on expensive laptops
      * in the corner drinking a macchiato and pretending to write a book. They'll always be singletons.
      *
-     * @since 2.0
+     * @since   2.0
      * @static
-     * @uses wpbitly::populate_options() To create our options array.
-     * @uses wpbitly::check_for_upgrade() You run your updates, right?
-     * @uses wpbitly::includes_files() To do something that sounds a lot like what it sounds like.
-     * @uses wpbitly::action_filters() To set up any necessary WordPress hooks.
-     * @return An|wpbitly
+     * @uses    wpbitly::populate_options()     To create our options array.
+     * @uses    wpbitly::includes_files()       To do something that sounds a lot like what it sounds like.
+     * @uses    wpbitly::check_for_upgrade()    You run your updates, right?
+     * @uses    wpbitly::action_filters()       To set up any necessary WordPress hooks.
+     * @return  An|wpbitly
      */
     public static function get_in()
     {
@@ -91,8 +91,8 @@ class wpbitly
         {
             self::$_instance = new self;
             self::$_instance->populate_options();
-            self::$_instance->check_for_upgrade();
             self::$_instance->include_files();
+            self::$_instance->check_for_upgrade();
             self::$_instance->action_filters();
         }
 
@@ -106,8 +106,8 @@ class wpbitly
      * for use elsewhere around the plugin. Don't modify options without making sure
      * they're up to date.
      *
-     * @since 2.0
-     * @return void
+     * @since   2.0
+     * @return  void
      */
     public function populate_options()
     {
@@ -116,6 +116,7 @@ class wpbitly
             'version'       => WPBITLY_VERSION,
             'oauth_token'   => '',
             'post_types'    => array( 'post', 'page' ),
+            'authorized'    => false,
         ) );
 
         $this->options = wp_parse_args(
@@ -126,11 +127,27 @@ class wpbitly
 
 
     /**
+     * WP Bitly is a pretty big plugin. Without this function, we'd probably include things
+     * in the wrong order, or not at all, and cold wars would erupt all over the planet.
+     *
+     * @since   2.0
+     * @return  void
+     */
+    public function include_files()
+    {
+        require_once( WPBITLY_DIR . '/includes/functions.php' );
+
+        if ( is_admin() )
+            require_once( WPBITLY_DIR . '/includes/admin/class.wpbitly-admin.php' );
+    }
+
+
+    /**
      * Simple wrapper for making sure everybody (who actually updates their plugins) is
      * current and that we don't just delete all their old data.
      *
-     * @since 2.0
-     * @return void
+     * @since   2.0
+     * @return  void
      */
     public function check_for_upgrade()
     {
@@ -140,7 +157,7 @@ class wpbitly
         {
 
             // If for some reason that array doesn't exist, then we don't have anything to work on.
-            if ( array_key_exists( 'post_types', $upgrade_needed ) )
+            if ( isset( $upgrade_needed['post_types'] ) && is_array( $upgrade_needed['post_types'] ) )
             {
                 $post_types = apply_filters( 'wpbitly_allowed_post_types', get_post_types( array( 'public' => true ) ) );
 
@@ -153,27 +170,9 @@ class wpbitly
                 $this->options['post_types'] = $upgrade_needed['post_types'];
             }
 
-            delete_option( 'wpbitly_options' ); // That's it. They've all changed.
+            delete_option( 'wpbitly_options' );
 
         }
-
-    }
-
-
-    /**
-     * WP Bitly is a pretty big plugin. Without this function, we'd probably include things
-     * in the wrong order, or not at all, and cold wars would erupt all over the planet.
-     *
-     * @since 2.0
-     * @return void
-     */
-    public function include_files()
-    {
-
-        if ( is_admin() )
-            require_once( WPBITLY_DIR . '/includes/admin/class.wpbitly-admin.php' );
-
-        require_once( WPBITLY_DIR . '/includes/functions.php' );
 
     }
 
@@ -183,10 +182,10 @@ class wpbitly
      * with in order to make the plugin work its magic. This method also registers our
      * super amazing slice of shortcode.
      *
-     * @since 2.0
-     * @TODO Instead of arbitrarily and invisibly deactivating the Jetpack module, it seems polite to have this ask.
-     * @TODO Until that gets added, move over Jetpack, WP Bit.ly owns this corner.
-     * @return void
+     * @since   2.0
+     * @TODO    Instead of arbitrarily and invisibly deactivating the Jetpack module, it seems polite to have this ask.
+     * @TODO    Until that gets added, move over Jetpack, WP Bit.ly owns this corner.
+     * @return  void
      */
     public function action_filters()
     {
@@ -198,7 +197,7 @@ class wpbitly
         add_filter( 'plugin_action_links_' . $basename, array( $this, 'add_action_links' ) );
 
         // Bingo, bango (ahhh, there's the stuff).
-        if ( isset( $this->options['oauth_token'] ) && $this->options['oauth_token'] )
+        if ( isset( $this->options['authorized'] ) && $this->options['authorized'] )
         {
             add_action( 'save_post', 'wpbitly_generate_shortlink' );
             add_filter( 'pre_get_shortlink', 'wpbitly_get_shortlink' );
@@ -224,9 +223,9 @@ class wpbitly
     /**
      * Add a settings link to the plugins page so people can figure out where we are.
      *
-     * @since 2.0
-     * @param $links An array returned by WordPress with our plugin action links
-     * @return array The slightly modified 'rray.
+     * @since   2.0
+     * @param   $links An array returned by WordPress with our plugin action links
+     * @return  array The slightly modified 'rray.
      */
     public function add_action_links( $links )
     {
@@ -244,8 +243,8 @@ class wpbitly
     /**
      * This would be much easier if we all spoke Esperanto (or Old Norse).
      *
-     * @since 2.0
-     * @return void
+     * @since   2.0
+     * @return  void
      */
     public function load_plugin_textdomain()
     {

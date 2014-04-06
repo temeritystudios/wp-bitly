@@ -16,6 +16,9 @@ function wpbitly_api()
             'clicks'    => '/v3/link/clicks?access_token=%1$s&link=%2$s',
             'refer'     => '/v3/link/referring_domains?access_token=%1$s&link=%2$s',
         ),
+        'user'      => array(
+            'info'  => '/v3/user/info?access_token=%1$s',
+        ),
     );
 }
 
@@ -56,6 +59,14 @@ function wpbitly_curl( $url )
 }
 
 
+function wpbitly_good_response( $response )
+{
+    if ( !is_array( $response ) )
+        return false;
+
+    return ( isset( $response['status_code'] ) && $response['status_code'] == 200 ) ? true : false;
+}
+
 /**
  * Generates the shortlink for the post specified by $post_id.
  */
@@ -90,7 +101,7 @@ function wpbitly_generate_shortlink( $post_id )
         $response = wpbitly_curl( $url );
 
         // If we have a shortlink for this post already, we've sent it to the Bit.ly expand API to verify that it will actually forward to this posts permalink
-        if ( is_array( $response ) && $response['status_code'] == 200 && $response['data']['expand'][0]['long_url'] == $permalink )
+        if ( wpbitly_good_response( $response ) && $response['data']['expand'][0]['long_url'] == $permalink )
             return $shortlink;
 
     }
@@ -100,7 +111,7 @@ function wpbitly_generate_shortlink( $post_id )
     $response = wpbitly_curl( $url );
 
     // Success?
-    if ( is_array( $response ) && $response['status_code'] == 200 )
+    if ( wpbitly_good_response( $response ) )
     {
         $shortlink = $response['data']['url'];
         update_post_meta( $post_id, '_wpbitly', $shortlink );
@@ -157,3 +168,4 @@ function wpbitly_shortcode( $atts )
     return the_shortlink( $text, $title, $before, $after );
 
 }
+
