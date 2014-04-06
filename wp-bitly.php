@@ -1,6 +1,6 @@
 <?php
 /**
- * WP Bit.ly
+ * WP Bitly
  *
  * This plugin can be used to generate short links for your websites posts, pages,
  * and any other custom post type that you would like it to interact with. Extremely
@@ -16,7 +16,7 @@
  * @copyright 2014 Mark Waterous
  *
  * @wordpress-plugin
- * Plugin Name:       WP Bit.ly
+ * Plugin Name:       WP Bitly
  * Plugin URI:        http://wordpress.org/plugins/wp-bitly
  * Description:       Whether you're sharing links on social media like Twitter, or sending someone a link from your smart phone, short links make life much easier. WP Bit.ly simplifies the process for you.
  * Version:           2.0-working
@@ -82,7 +82,7 @@ final class wpbitly
      * @uses    wpbitly::includes_files()       To do something that sounds a lot like what it sounds like.
      * @uses    wpbitly::check_for_upgrade()    You run your updates, right?
      * @uses    wpbitly::action_filters()       To set up any necessary WordPress hooks.
-     * @return  An|wpbitly
+     * @return  wpbitly
      */
     public static function get_in()
     {
@@ -107,7 +107,6 @@ final class wpbitly
      * they're up to date.
      *
      * @since   2.0
-     * @return  void
      */
     public function populate_options()
     {
@@ -131,7 +130,6 @@ final class wpbitly
      * in the wrong order, or not at all, and cold wars would erupt all over the planet.
      *
      * @since   2.0
-     * @return  void
      */
     public function include_files()
     {
@@ -147,7 +145,6 @@ final class wpbitly
      * current and that we don't just delete all their old data.
      *
      * @since   2.0
-     * @return  void
      */
     public function check_for_upgrade()
     {
@@ -185,7 +182,6 @@ final class wpbitly
      * @since   2.0
      * @TODO    Instead of arbitrarily and invisibly deactivating the Jetpack module, it seems polite to have this ask.
      * @TODO    Until that gets added, move over Jetpack, WP Bit.ly owns this corner.
-     * @return  void
      */
     public function action_filters()
     {
@@ -244,7 +240,6 @@ final class wpbitly
      * This would be much easier if we all spoke Esperanto (or Old Norse).
      *
      * @since   2.0
-     * @return  void
      */
     public function load_plugin_textdomain()
     {
@@ -272,7 +267,7 @@ final class wpbitly
  * Makes life easier.
  * In fact, the phpdoc block is bigger than the function itself.
  *
- * @return An|wpbitly
+ * @return wpbitly
  */
 function wp_bitly()
 {
