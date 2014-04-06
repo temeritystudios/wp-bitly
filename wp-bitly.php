@@ -51,7 +51,7 @@ define( 'WPBITLY_URL',  plugins_url().'/'.basename( dirname( __FILE__ ) ) );
  * @package wp-bitly
  * @author  Mark Waterous <mark@watero.us>
  */
-final class wpbitly
+final class _wpbitly
 {
 
     /**
@@ -78,10 +78,10 @@ final class wpbitly
      *
      * @since   2.0
      * @static
-     * @uses    wpbitly::populate_options()     To create our options array.
-     * @uses    wpbitly::includes_files()       To do something that sounds a lot like what it sounds like.
-     * @uses    wpbitly::check_for_upgrade()    You run your updates, right?
-     * @uses    wpbitly::action_filters()       To set up any necessary WordPress hooks.
+     * @uses    _wpbitly::populate_options()     To create our options array.
+     * @uses    _wpbitly::includes_files()       To do something that sounds a lot like what it sounds like.
+     * @uses    _wpbitly::check_for_upgrade()    You run your updates, right?
+     * @uses    _wpbitly::action_filters()       To set up any necessary WordPress hooks.
      * @return  wpbitly
      */
     public static function get_in()
@@ -262,16 +262,16 @@ final class wpbitly
 
 
 /**
- * Call this in place of wpbitly::get_in()
+ * Call this in place of _wpbitly::get_in()
  * It's shorthand.
  * Makes life easier.
  * In fact, the phpdoc block is bigger than the function itself.
  *
  * @return wpbitly
  */
-function wp_bitly()
+function wpbitly()
 {
-    return wpbitly::get_in();
+    return _wpbitly::get_in();
 }
 
-wp_bitly();
+wpbitly();

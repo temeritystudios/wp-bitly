@@ -40,11 +40,10 @@ function wpbitly_api( $api_call )
  * @return  bool|array      False on failure, array on success
  */
 
-function wpbitly_curl( $url )
+function wpbitly_curl( $url = '' )
 {
 
     // Say $url phonetically. Is it Yer'l or Earl?
-    $url = esc_url( $url);
     if ( empty( $url ) )
         return false;
 
@@ -98,7 +97,7 @@ function wpbitly_good_response( $response )
 function wpbitly_generate_shortlink( $post_id )
 {
 
-    $wpbitly = wp_bitly();
+    $wpbitly = wpbitly();
 
     // Don't waste cycles every time WordPress autosaves, or if we're missing a token.
     if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || !$wpbitly->options['authorized'] )
@@ -151,11 +150,11 @@ function wpbitly_generate_shortlink( $post_id )
  * @return  bool|string False on failure, shortlink on success.
  */
 
-function wpbitly_get_shortlink( $shortlink, $post_id )
+function wpbitly_get_shortlink( $shortlink, $post_id = '' )
 {
 
     // Needs post id.
-    if ( $post_id === 0 )
+    if ( empty( $post_id ) || $post_id === 0 )
     {
         global $post;
         $post_id = ( isset( $post ) ? $post->ID : '' );

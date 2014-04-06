@@ -5,18 +5,27 @@ Requires at least: 3.8.1
 Tested up to: 3.8.1
 Stable tag: 2.0
 
-Use the Bitly API to generate shortlinks for all of your posts and pages instead of the internal http://www.yourdomain.com/?p=1 short links WordPress generates.
+Use Bitly generated shortlinks for all your WordPress posts and pages, including custom post types.
 
 
 == Description ==
 
-WP Bitly is one of the quickest and easiest plugins you'll deal with this year.
+WP Bitly is one of the quickest and easiest plugins you'll deal with this year. Even [WPBeginner](http://www.wpbeginner.com/blueprint/wp-bitly/) uses it!
 
-Give it an authorization token (automatically generated for you by Bitly), tell it which post types you'd like shortlinks generated for, and forget about it! WP Bitly does the rest for you.
+Provide WP Bitly with an authorization token (automatically generated for you by Bitly), tell it which post types you'd like to generate shortlinks for, and forget about it! WP Bitly does the rest for you.
 
 Shortlinks are a great way to quickly share posts on social media like Twitter, Instagram and Facebook. Just finished writing an amazing post and want to share that post with your friend? It's a lot easier to text message a shortlink than the entire address.
 
 WP Bitly also provides some insights (via a metabox on your edit post screen) as to how your link is being passed around, and who's clicking on it.
+
+= Coming Soon =
+
+* More feedback from Bitly on how your link is generating leads
+* Feature Requests are welcome via the [Support Forum](http://wordpress.org/support/plugin/wp-bitly)
+
+= This Plugin is GPL =
+
+There is someone selling a plugin of the exact same name off a domain of the same name. This is not WP Bitly. WP Bitly is open source and free, and will remain so forever.
 
 
 == Installation ==

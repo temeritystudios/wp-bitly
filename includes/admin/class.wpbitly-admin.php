@@ -29,7 +29,7 @@ class wpbitly_admin
      *
      * @since   2.0
      * @static
-     * @uses    wpbitly::action_filters() To set up any necessary WordPress hooks.
+     * @uses    _wpbitly::action_filters() To set up any necessary WordPress hooks.
      * @return  wpbitly_admin
      */
     public static function get_in()
@@ -49,12 +49,12 @@ class wpbitly_admin
      * Hook any necessary WordPress actions or filters that we'll be needing for the admin.
      *
      * @since   2.0
-     * @uses    wp_bitly()
+     * @uses    wpbitly()
      */
     public function action_filters()
     {
 
-        $wpbitly = wp_bitly();
+        $wpbitly = wpbitly();
 
         add_action( 'admin_init', array( $this, 'register_settings' ) );
 
@@ -128,11 +128,12 @@ class wpbitly_admin
         function _f_settings_field_oauth()
         {
 
-            $wpbitly = wp_bitly();
+            $wpbitly = wpbitly();
 
             $url = apply_filters( 'wpbitly_oauth_url', 'https://bitly.com/a/wordpress_oauth_app' );
 
-            $output = '<input type="text" size="80" name="wpbitly-options[oauth_token]" value="' . esc_attr( $wpbitly->options['oauth_token'] ) . '" />'
+            $auth_css = $wpbitly->options['authorized'] ? '' : ' style="border-color: #c00; background-color: #ffecec;" ';
+            $output = '<input type="text" size="80" name="wpbitly-options[oauth_token]" value="' . esc_attr( $wpbitly->options['oauth_token'] ) . '"' . $auth_css . ' />'
                     . '<p>' . __( 'Please provide your', 'wp-bitly' ) . ' <a href="'.$url.'" target="_blank" style="text-decoration: none;"> ' . __( 'OAuth Token', 'wp-bitly' ) . '</a></p>';
 
             echo $output;
@@ -147,7 +148,7 @@ class wpbitly_admin
         function _f_settings_field_post_types()
         {
 
-            $wpbitly = wp_bitly();
+            $wpbitly = wpbitly();
 
             $post_types = apply_filters( 'wpbitly_allowed_post_types', get_post_types( array( 'public' => true ) ) );
             $output = '';
@@ -173,24 +174,25 @@ class wpbitly_admin
      * changed.
      *
      * @since   2.0
-     * @uses    wp_bitly()
+     * @uses    wpbitly()
      * @param   array   $input  WordPress sanitized data array
      * @return  array           WP Bit.ly sanitized data
      */
     public function validate_settings( $input )
     {
 
-        $wpbitly = wp_bitly();
+        $wpbitly = wpbitly();
 
         // Validate the OAuth token, but only if it's necessary.
         if ( $input['oauth_token'] != $wpbitly->options['oauth_token'] )
         { // Verify the provided OAuth Token
             $input['oauth_token'] = wp_filter_nohtml_kses( $input['oauth_token'] );
 
-            $url = sprintf( wpbitly_api( 'user/info' ), $wpbitly->options['oauth_token'] );
+            $url = sprintf( wpbitly_api( 'user/info' ), $input['oauth_token'] );
             $response = wpbitly_curl( $url );
 
             $input['authorized'] = ( wpbitly_good_response( $response ) && isset( $response['data']['member_since'] ) ) ? true : false;
+
         }
 
         // Nothing checked? Return an array.
@@ -242,14 +244,14 @@ class wpbitly_admin
      * Handles the display of the metabox. It's big enough to warrant it's own method.
      *
      * @since   2.0
-     * @uses    wp_bitly()
+     * @uses    wpbitly()
      * @param   object  $post   WordPress passed $post object
      * @param   array   $args   Passed by our call to add_meta_box(), just the $shortlink in this case.
      */
     public function display_metabox( $post, $args )
     {
 
-        $wpbitly = wp_bitly();
+        $wpbitly = wpbitly();
         $shortlink = $args['args'][0];
 
         { // Look for a clicks response
