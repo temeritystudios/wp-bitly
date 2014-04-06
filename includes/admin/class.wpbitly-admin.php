@@ -123,13 +123,15 @@ class wpbitly_admin
         }
         else
         {
-            $post_types = apply_filters( 'wpbitly_valid_post_types', get_post_types( array( 'public' => true ) ) );
 
-            foreach ( $input['post_types'] as $pt )
+            $post_types = apply_filters( 'wpbitly_allowed_post_types', get_post_types( array( 'public' => true ) ) );
+
+            foreach ( $upgrade_needed['post_types'] as $key => $pt )
             {
                 if ( ! in_array( $pt, $post_types ) )
-                    unset( $input['post_types'][$pt] );
+                    unset( $upgrade_needed['post_types'][$key] );
             }
+
         }
 
         return $input;
