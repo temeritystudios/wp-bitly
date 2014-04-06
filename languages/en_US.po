@@ -1,80 +1,82 @@
-# Copyright (C) 2014 WP Bit.ly
-# This file is distributed under the same license as the WP Bit.ly package.
+# Copyright (C) 2014 WP Bitly
+# This file is distributed under the same license as the WP Bitly package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WP Bit.ly 2.0\n"
+"Project-Id-Version: WP Bitly 2.0-working\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/tag/wp-bitly\n"
-"POT-Creation-Date: 2014-04-06 03:16:57+00:00\n"
+"POT-Creation-Date: 2014-04-06 17:49:47+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2014-04-05 21:20-0700\n"
+"PO-Revision-Date: 2014-04-06 11:50-0700\n"
 "Last-Translator: \n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "X-Generator: Poedit 1.6.4\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Language: en_US\n"
 
-#: includes/admin/class.wpbitly-admin.php:52
+#: includes/admin/class.wpbitly-admin.php:90
 msgid "WP Bit.Ly is almost ready!"
 msgstr ""
 
-#: includes/admin/class.wpbitly-admin.php:53
+#: includes/admin/class.wpbitly-admin.php:91
 msgid "settings page"
 msgstr ""
 
-#: includes/admin/class.wpbitly-admin.php:54
+#: includes/admin/class.wpbitly-admin.php:92
 msgid "Please visit the %s to configure WP Bit.ly"
 msgstr ""
 
-#: includes/admin/class.wpbitly-admin.php:70
+#: includes/admin/class.wpbitly-admin.php:120
 msgid ""
 "You will need a Bit.ly account to use this plugin. Click the link below for "
 "your OAuth Token, and if necessary create a new account."
 msgstr ""
 
-#: includes/admin/class.wpbitly-admin.php:74
+#: includes/admin/class.wpbitly-admin.php:124
 msgid "Bit.ly OAuth Token"
 msgstr ""
 
-#: includes/admin/class.wpbitly-admin.php:83
+#: includes/admin/class.wpbitly-admin.php:136
 msgid "Please provide your"
 msgstr ""
 
-#: includes/admin/class.wpbitly-admin.php:83
+#: includes/admin/class.wpbitly-admin.php:136
 msgid "OAuth Token"
 msgstr ""
 
-#: includes/admin/class.wpbitly-admin.php:90
+#: includes/admin/class.wpbitly-admin.php:143
 msgid "Post Types"
 msgstr ""
 
-#: includes/admin/class.wpbitly-admin.php:106
+#: includes/admin/class.wpbitly-admin.php:162
 msgid "Check each post type you want to generate short links for."
 msgstr ""
 
-#: includes/admin/class.wpbitly-admin.php:161
+#: includes/admin/class.wpbitly-admin.php:272
 msgid "Bit.ly Statistics"
 msgstr ""
 
-#: includes/admin/class.wpbitly-admin.php:179
+#: includes/admin/class.wpbitly-admin.php:277
 msgid "Global click through:"
 msgstr ""
 
-#: includes/admin/class.wpbitly-admin.php:183
+#: includes/admin/class.wpbitly-admin.php:281
 msgid "Your link was shared on"
 msgstr ""
 
-#: includes/admin/class.wpbitly-admin.php:196
-msgid "There was a problem retrieving information about your link!"
+#: includes/admin/class.wpbitly-admin.php:294
+msgid ""
+"There was a problem retrieving information about your link. There may be no "
+"statistics yet."
 msgstr ""
 
-#: wp-bitly.php:133
+#: wp-bitly.php:231
 msgid "Settings"
 msgstr ""
 
 #. Plugin Name of the plugin/theme
-msgid "WP Bit.ly"
+msgid "WP Bitly"
 msgstr ""
 
 #. Plugin URI of the plugin/theme
