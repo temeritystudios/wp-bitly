@@ -9,10 +9,13 @@
 function wpbitly_api()
 {
     return array(
-        'shorten'  => 'http://api.bit.ly/v3/shorten?login=%s&apiKey=%s&uri=%s&format=json',
-        'expand'   => 'http://api.bit.ly/v3/expand?shortUrl=%s&login=%s&apiKey=%s&format=json',
-        'validate' => 'http://api.bit.ly/v3/validate?x_login=%s&x_apiKey=%s&login=wpbitly&apiKey=%s&format=json',
-        'clicks'   => 'http://api.bit.ly/v3/clicks?shortUrl=%s&login=%s&apiKey=%s&format=json',
+        'base'      => 'https://api-ssl.bitly.com',
+        'shorten'   => '/v3/shorten?access_token=%1$s&longUrl=%2$s',
+        'expand'    => '/v3/expand?access_token=%1$s&shortUrl=%2$s',
+        'link'      => array(
+            'clicks'    => '/v3/link/clicks?access_token=%1$s&link=%2$s',
+            'refer'     => '/v3/link/referring_domains?access_token=%1$s&link=%2$s',
+        ),
     );
 }
 
@@ -81,25 +84,25 @@ function wpbitly_generate_shortlink( $post_id )
     $shortlink = get_post_meta( $post_id, '_wpbitly', true );
 
 
-    if ( $shortlink != false )
+    if ( !empty( $shortlink ) )
     {
-        $url = sprintf( $bapi['expand'], $shortlink, $wpbitly->options['oauth_token'] );
-        $bitly_response = $this->_curl( $url );
+        $url = sprintf( $bapi['base'] . $bapi['expand'], $wpbitly->options['oauth_token'], $shortlink );
+        $response = wpbitly_curl( $url );
 
         // If we have a shortlink for this post already, we've sent it to the Bit.ly expand API to verify that it will actually forward to this posts permalink
-        if ( is_array( $bitly_response ) && $bitly_response['status_code'] == 200 && $bitly_response['data']['expand'][0]['long_url'] == $permalink )
+        if ( is_array( $response ) && $response['status_code'] == 200 && $response['data']['expand'][0]['long_url'] == $permalink )
             return $shortlink;
 
     }
 
     // Submit to Bit.ly API and look for a response
-    $url = sprintf( $bapi['shorten'], $wpbitly->options['oauth_token'], urlencode( $permalink ) );
-    $bitly_response = $this->_curl( $url );
+    $url = sprintf( $bapi['base'] . $bapi['shorten'], $wpbitly->options['oauth_token'], urlencode( $permalink ) );
+    $response = wpbitly_curl( $url );
 
     // Success?
-    if ( is_array( $bitly_response ) && $bitly_response['status_code'] == 200 )
+    if ( is_array( $response ) && $response['status_code'] == 200 )
     {
-        $shortlink = $bitly_response['data']['url'];
+        $shortlink = $response['data']['url'];
         update_post_meta( $post_id, '_wpbitly', $shortlink );
     }
 
@@ -113,7 +116,7 @@ function wpbitly_generate_shortlink( $post_id )
  * filter for internal use.
  */
 
-function wpbitly_get_shortlink( $shortlink, $id )
+function wpbitly_get_shortlink( $shortlink, $id = '' )
 {
 
     // Look for the post ID passed by wp_get_shortlink() first
@@ -130,7 +133,7 @@ function wpbitly_get_shortlink( $shortlink, $id )
 
     $shortlink = get_post_meta( $id, '_wpbitly', true );
 
-    if ( $shortlink == false )
+    if ( empty( $shortlink ) )
         $shortlink = wpbitly_generate_shortlink( $id );
 
     return $shortlink;

@@ -33,7 +33,7 @@ if ( ! defined( 'WPINC' ) )
 
 define( 'WPBITLY_VERSION',  '2.0' );
 
-define( 'WPBITLY_FILE', __FILE__ )
+define( 'WPBITLY_FILE', __FILE__ );
 define( 'WPBITLY_DIR',  WP_PLUGIN_DIR.'/'.basename( dirname( __FILE__ ) ) );
 define( 'WPBITLY_URL',  plugins_url().'/'.basename( dirname( __FILE__ ) ) );
 
@@ -59,7 +59,7 @@ class wpbitly
     public $options;
 
 
-    public static function get_instance()
+    public static function get_in()
     {
 
         if ( !isset( self::$_instance ) && !( self::$_instance instanceof wpbitly ) )
@@ -77,7 +77,17 @@ class wpbitly
 
     public function populate_options()
     {
-        $this->options = get_option( 'wpbitly-options' );
+
+        $defaults = apply_filters( 'wpbitly_default_options', array(
+            'version'       => WPBITLY_VERSION,
+            'oauth_token'   => '',
+            'post_types'    => array( 'post', 'page' ),
+        ) );
+
+        $this->options = wp_parse_args(
+            get_option( 'wpbitly-options' ),
+            $defaults );
+
     }
 
 
@@ -100,10 +110,10 @@ class wpbitly
         $basename = plugin_basename( __FILE__ );
         add_filter( 'plugin_action_links_' . $basename, array( $this, 'add_action_links' ) );
 
-        if ( isset( $this->options['authorized'] ) && $this->options['authorized'] )
+        if ( isset( $this->options['oauth_token'] ) && $this->options['oauth_token'] )
         {
             add_action( 'save_post', 'wpbitly_generate_shortlink' );
-            add_filter( 'get_shortlink', 'wpbitly_get_shortlink' );
+            add_filter( 'pre_get_shortlink', 'wpbitly_get_shortlink' );
         }
 
         add_shortcode( 'wpbitly', 'wpbitly_shortcode' );
@@ -149,7 +159,7 @@ class wpbitly
 
 function wp_bitly()
 {
-    return wpbitly::get_instance();
+    return wpbitly::get_in();
 }
 
 wp_bitly();

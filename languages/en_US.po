@@ -1,0 +1,95 @@
+# Copyright (C) 2014 WP Bit.ly
+# This file is distributed under the same license as the WP Bit.ly package.
+msgid ""
+msgstr ""
+"Project-Id-Version: WP Bit.ly 2.0\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/tag/wp-bitly\n"
+"POT-Creation-Date: 2014-04-06 03:16:57+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2014-04-05 21:20-0700\n"
+"Last-Translator: \n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"X-Generator: Poedit 1.6.4\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: en_US\n"
+
+#: includes/admin/class.wpbitly-admin.php:52
+msgid "WP Bit.Ly is almost ready!"
+msgstr ""
+
+#: includes/admin/class.wpbitly-admin.php:53
+msgid "settings page"
+msgstr ""
+
+#: includes/admin/class.wpbitly-admin.php:54
+msgid "Please visit the %s to configure WP Bit.ly"
+msgstr ""
+
+#: includes/admin/class.wpbitly-admin.php:70
+msgid ""
+"You will need a Bit.ly account to use this plugin. Click the link below for "
+"your OAuth Token, and if necessary create a new account."
+msgstr ""
+
+#: includes/admin/class.wpbitly-admin.php:74
+msgid "Bit.ly OAuth Token"
+msgstr ""
+
+#: includes/admin/class.wpbitly-admin.php:83
+msgid "Please provide your"
+msgstr ""
+
+#: includes/admin/class.wpbitly-admin.php:83
+msgid "OAuth Token"
+msgstr ""
+
+#: includes/admin/class.wpbitly-admin.php:90
+msgid "Post Types"
+msgstr ""
+
+#: includes/admin/class.wpbitly-admin.php:106
+msgid "Check each post type you want to generate short links for."
+msgstr ""
+
+#: includes/admin/class.wpbitly-admin.php:161
+msgid "Bit.ly Statistics"
+msgstr ""
+
+#: includes/admin/class.wpbitly-admin.php:179
+msgid "Global click through:"
+msgstr ""
+
+#: includes/admin/class.wpbitly-admin.php:183
+msgid "Your link was shared on"
+msgstr ""
+
+#: includes/admin/class.wpbitly-admin.php:196
+msgid "There was a problem retrieving information about your link!"
+msgstr ""
+
+#: wp-bitly.php:133
+msgid "Settings"
+msgstr ""
+
+#. Plugin Name of the plugin/theme
+msgid "WP Bit.ly"
+msgstr ""
+
+#. Plugin URI of the plugin/theme
+msgid "http://wordpress.org/plugins/wp-bitly"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid ""
+"Whether you're sharing links on social media like Twitter, or sending "
+"someone a link from your smart phone, short links make life much easier. WP "
+"Bit.ly simplifies the process for you."
+msgstr ""
+
+#. Author of the plugin/theme
+msgid ""
+"<a href=\"http://mark.watero.us/\">Mark Waterous</a> & <a href=\"http://www."
+"chipbennett.net/\">Chip Bennett</a>"
+msgstr ""

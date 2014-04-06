@@ -10,19 +10,19 @@
 class wpbitly_admin
 {
 
-    protected static $instance = null;
+    protected static $_instance = null;
 
 
-    public static function get_instance()
+    public static function get_in()
     {
 
-        if ( null == self::$instance )
+        if ( !isset( self::$_instance ) && !( self::$_instance instanceof wpbitly_admin ) )
         {
-            self::$instance = new self;
-            self::$instance->action_filters();
+            self::$_instance = new self;
+            self::$_instance->action_filters();
         }
 
-        return self::$instance;
+        return self::$_instance;
     }
 
 
@@ -33,12 +33,13 @@ class wpbitly_admin
 
         add_action( 'admin_init', array( $this, 'register_settings' ) );
 
-        // @TODO This is annoying. Disabled until further notice, pun possibly intended.
+        // @TODO This is annoying. Disabled until further notice, pun intended.
         if ( empty( $wpbitly->options['oauth_token'] ) && 1 == 0 )
             add_action( 'admin_notices', array( $this, 'display_notice' ) );
 
-        foreach ( $wpbitly_options['post_types'] as $post_type )
-            add_action( 'add_meta_boxes_' . $post_type, array( $this, 'add_metaboxes_yo' ) );
+        if  ( array_key_exists( 'post_types', $wpbitly->options ) && is_array( $wpbitly->options['post_types'] ) )
+            foreach ( $wpbitly->options['post_types'] as $post_type )
+                add_action( 'add_meta_boxes_' . $post_type, array( $this, 'add_metaboxes_yo' ) );
 
     }
 
@@ -66,7 +67,7 @@ class wpbitly_admin
         add_settings_section( 'wpbitly_settings', 'WP Bit.ly Options', 'wpbitly_settings_section', 'writing' );
 
         function wpbitly_settings_section() {
-            echo apply_filters( 'wpbitly_settings_section', '<p>'.__( 'Configure WP Bit.ly settings here.', 'wp-bitly' ).'</p>' );
+            echo apply_filters( 'wpbitly_settings_section', '<p>'.__( 'You will need a Bit.ly account to use this plugin. Click the link below for your OAuth Token, and if necessary create a new account.', 'wp-bitly' ).'</p>' );
         }
 
 
@@ -79,32 +80,32 @@ class wpbitly_admin
             $url = apply_filters( 'wpbitly_oauth_url', 'https://bitly.com/a/wordpress_oauth_app' );
 
             $output = '<input type="text" size="80" name="wpbitly-options[oauth_token]" value="' . esc_attr( $wpbitly->options['oauth_token'] ) . '" />'
-                    . '<p>' . __( 'Please provide your', 'wp-bitly' ) . ' <a href="'.$url.'" target="_blank"> ' . __( 'OAuth Token', 'wp-bitly' ) . '</a></p>';
+                    . '<p>' . __( 'Please provide your', 'wp-bitly' ) . ' <a href="'.$url.'" target="_blank" style="text-decoration: none;"> ' . __( 'OAuth Token', 'wp-bitly' ) . '</a></p>';
 
-            echo apply_filters( 'wpbitly_settings_field_oauth', $output );
+            echo $output;
 
         }
 
 
-        add_settings_field( 'posttypes', '<label for="posttypes">' . __( 'Post Types' , 'wp-bitly' ) . '</label>', 'settings_field_posttypes', 'writing', 'wpbitly_settings' );
-        function settings_field_posttypes()
+        add_settings_field( 'post_types', '<label for="post_types">' . __( 'Post Types' , 'wp-bitly' ) . '</label>', 'settings_field_post_types', 'writing', 'wpbitly_settings' );
+        function settings_field_post_types()
         {
 
             $wpbitly = wp_bitly();
 
-            $posttypes = apply_filters( 'wpbitly_allowed_posttypes', get_post_types( array( 'public' => true ) ) );
+            $post_types = apply_filters( 'wpbitly_allowed_post_types', get_post_types( array( 'public' => true ) ) );
             $output = '';
 
-            foreach ( $posttypes as $label )
+            foreach ( $post_types as $label )
             {
                 $output .= '<label for "' . $label . '>'
-                    . '<input type="checkbox" name="wpbitly-options[posttypes][]" value="' . $label . '" ' . checked( in_array( $label, $wpbitly->options['posttypes'] ), true, false ) . '>'
+                    . '<input type="checkbox" name="wpbitly-options[post_types][]" value="' . $label . '" ' . checked( in_array( $label, $wpbitly->options['post_types'] ), true, false ) . '>'
                     . '<span>' . $label . '</span><br />';
             }
 
             $output .= '<p>' . __( 'Check each post type you want to generate short links for.', 'wp-bitly' ) . '</p>';
 
-            echo apply_filters( 'wpbitly_settings_field_posttypes', $output );
+            echo $output;
 
         }
 
@@ -116,19 +117,18 @@ class wpbitly_admin
 
         $input['oauth_token'] = wp_filter_nohtml_kses( $input['oauth_token'] );
 
-        // Post Types
-        if ( !isset( $input['posttypes'] ) )
+        if ( !isset( $input['post_types'] ) )
         {
-            $input['posttypes'] = array();
+            $input['post_types'] = array();
         }
         else
         {
-            $posttypes = $this->_get_posttypes();
+            $post_types = apply_filters( 'wpbitly_valid_post_types', get_post_types( array( 'public' => true ) ) );
 
-            foreach ( $input['posttypes'] as $posttype )
+            foreach ( $input['post_types'] as $pt )
             {
-                if ( ! in_array( $posttype, $posttypes ) )
-                    unset( $input['posttypes'][$posttype] );
+                if ( ! in_array( $pt, $post_types ) )
+                    unset( $input['post_types'][$pt] );
             }
         }
 
@@ -158,25 +158,47 @@ class wpbitly_admin
 
         $shortlink = $args['args'][0];
 
-        echo '<label class="screen-reader-text" for="new-tag-post_tag">WP Bit.ly</label>';
-        echo '<p style="margin-top: 8px;"><input type="text" id="wpbitly-shortlink" name="_wpbitly" size="32" autocomplete="off" value="' . $shortlink . '" style="margin-right: 4px; color: #aaa;" /></p>';
+        echo '<label class="screen-reader-text" for="new-tag-post_tag">' . __( 'Bit.ly Statistics', 'wp-bitly' ) . '</label>';
 
-        $url = sprintf( $bapi['clicks'], $shortlink, $wpbitly->options['oauth_token'] );
-        $bitly_response = wpbitly_curl( $url );
+        $url = sprintf( $bapi['base'] . $bapi['link']['clicks'], $wpbitly->options['oauth_token'], $shortlink );
+        $response = wpbitly_curl( $url );
 
-        echo '<h4 style="margin-left: 4px; margin-right: 4px; padding-bottom: 3px; border-bottom: 4px solid #eee;">' . __( 'Shortlink Stats', 'wp-bitly' ) . '</h4>';
+        if ( is_array( $response ) && $response['status_code'] == 200 )
+            $clicks = $response['data']['link_clicks'];
 
-        if ( is_array( $bitly_response ) && $bitly_response['status_code'] == 200 )
+
+        $url = sprintf( $bapi['base'] . $bapi['link']['refer'], $wpbitly->options['oauth_token'], $shortlink );
+        $response = wpbitly_curl( $url );
+
+        if ( is_array( $response ) && $response['status_code'] == 200 )
+            $refer = $response['data']['referring_domains'];
+
+        if ( isset( $clicks ) && isset( $refer ) )
         {
-            echo '<p>' . __( 'Global Clicks:', 'wp-bitly ) . " <strong>{$bitly_response['data']['clicks'][0]['global_clicks']}</strong></p>";
-            echo '<p>' . __( 'User Clicks:', 'wp-bitly ) . " <strong>{$bitly_response['data']['clicks'][0]['user_clicks']}</strong></p>";
+
+            echo '<p>' . __( 'Global click through:', 'wp-bitly' ) . ' <strong>' . $clicks . '</strong></p>';
+
+            if ( !empty( $refer ) )
+            {
+                echo '<h4 style="padding-bottom: 3px; border-bottom: 4px solid #eee;">' . __( 'Your link was shared on', 'wp-bitly' ) . '</h4>';
+                foreach ( $refer as $domain )
+                {
+                    if ( isset( $domain['url'] ) )
+                        printf( '<a href="%1$s" target="_blank" title="%2$s">%2$s</a> (%3$d)<br />', $domain['url'], $domain['domain'], $domain['clicks'] );
+                    else
+                        printf( '<strong>%1$s</strong> (%2$d)<br />', $domain['domain'], $domain['clicks'] );
+                }
+            }
+
         }
         else
         {
-            echo '<p class="error" style="padding: 4px;">' . __( 'There was a problem retrieving stats!', 'wp-bitly' ) . '</p>';
+            echo '<p class="error">' . __( 'There was a problem retrieving information about your link!', 'wp-bitly' ) . '</p>';
         }
 
     }
 
 
 }
+
+wpbitly_admin::get_in();
