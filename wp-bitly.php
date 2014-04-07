@@ -82,12 +82,12 @@ final class _wpbitly
      * @uses    _wpbitly::includes_files()       To do something that sounds a lot like what it sounds like.
      * @uses    _wpbitly::check_for_upgrade()    You run your updates, right?
      * @uses    _wpbitly::action_filters()       To set up any necessary WordPress hooks.
-     * @return  wpbitly
+     * @return  _wpbitly
      */
     public static function get_in()
     {
 
-        if ( !isset( self::$_instance ) && !( self::$_instance instanceof wpbitly ) )
+        if ( !isset( self::$_instance ) && !( self::$_instance instanceof _wpbitly ) )
         {
             self::$_instance = new self;
             self::$_instance->populate_options();
@@ -267,7 +267,7 @@ final class _wpbitly
  * Makes life easier.
  * In fact, the phpdoc block is bigger than the function itself.
  *
- * @return wpbitly
+ * @return _wpbitly
  */
 function wpbitly()
 {
