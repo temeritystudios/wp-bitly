@@ -10,7 +10,7 @@ Use Bitly generated shortlinks for all your WordPress posts and pages, including
 
 == Description ==
 
-WP Bitly is one of the quickest and easiest plugins you'll deal with this year. Even [WPBeginner](http://www.wpbeginner.com/blueprint/wp-bitly/) uses it!
+WP Bitly is a plugin you'll remember for how easy it was to install and configure. Even [WPBeginner](http://www.wpbeginner.com/blueprint/wp-bitly/) uses it!
 
 Provide WP Bitly with an authorization token (automatically generated for you by Bitly), tell it which post types you'd like to generate shortlinks for, and forget about it! WP Bitly does the rest for you.
 
@@ -25,7 +25,7 @@ WP Bitly also provides some insights (via a metabox on your edit post screen) as
 
 = This Plugin is GPL =
 
-There is someone selling a plugin of the exact same name off a domain of the same name. This is not WP Bitly. WP Bitly is open source and free, and will remain so forever.
+*Someone out there is selling a plugin with the exact same name as WP Bitly, from a domain of the same name. I am not claiming it's a rip off of my plugin, as I have no idea to be fair, but it **is not WP Bitly**. This plugin is open source and free, and will remain so forever.
 
 
 == Installation ==
