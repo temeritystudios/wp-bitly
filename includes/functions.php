@@ -48,27 +48,11 @@ function wpbitly_get( $url = '' )
 
     $the = wp_remote_get( $url );
 
-    if ( ! empty( $result ) && '200' == $the['response']['code'] )
+    if ( is_array( $the ) && '200' == $the['response']['code'] )
         return json_decode( $the['body'], true );
 
     return false;
 
-}
-
-
-/**
- * Check our response for validity before proceeding.
- *
- * @since   2.0
- * @param   array   $response   This should be a json_decode()'d array
- * @return  bool
- */
-function wpbitly_good_response( $response )
-{
-    if ( !is_array( $response ) )
-        return false;
-
-    return ( isset( $response['status_code'] ) && $response['status_code'] == 200 ) ? true : false;
 }
 
 
@@ -102,22 +86,22 @@ function wpbitly_generate_shortlink( $post_id )
     // Link to be generated
     $permalink = get_permalink( $post_id );
     $shortlink = get_post_meta( $post_id, '_wpbitly', true );
-$shortlink = '';
+
     if ( !empty( $shortlink ) )
     { // We shouldn't get here if there's already a shortlink, but if we did, let's verify it.
         $url = sprintf( wpbitly_api( 'expand' ), $wpbitly->options['oauth_token'], $shortlink );
         $response = wpbitly_get( $url );
 
-        if ( wpbitly_good_response( $response ) && $permalink == $response['data']['expand'][0]['long_url'] )
+        if ( $permalink == $response['data']['expand'][0]['long_url'] )
             return $shortlink;
     }
 
     // Get Shorty.
-    $url = sprintf( wpbitly_api( 'shorten' ), $wpbitly->options['oauth_token'], urlencode( $permalink ) ); md( $url );
+    $url = sprintf( wpbitly_api( 'shorten' ), $wpbitly->options['oauth_token'], urlencode( $permalink ) );
     $response = wpbitly_get( $url );
 
-    if ( wpbitly_good_response( $response ) )
-    { // We caught something!!
+    if ( is_array( $response ) )
+    {
         $shortlink = $response['data']['url'];
         update_post_meta( $post_id, '_wpbitly', $shortlink );
     }
@@ -143,18 +127,18 @@ function wpbitly_get_shortlink( $shortlink, $post_id = '' )
     if ( empty( $post_id ) || $post_id === 0 )
     {
         global $post;
-        $post_id = ( isset( $post ) ? $post->ID : '' );
+        $post_id = is_object( $post ) ? $post->ID : '';
     }
 
-    // No $post_id?
+    // Still no $post_id?
     if ( empty( $post_id ) )
         return $shortlink;
 
 
-    { // We have a $post_id, lets get the shortlink.
-        //$shortlink = get_post_meta( $post_id, '_wpbitly', true );
+    { // We have a $post_id.
+        $shortlink = get_post_meta( $post_id, '_wpbitly', true );
 
-        //if ( empty( $shortlink ) )
+        if ( empty( $shortlink ) )
             $shortlink = wpbitly_generate_shortlink( $post_id );
     }
 
@@ -185,5 +169,3 @@ function wpbitly_shortcode( $atts = array() )
 
     return the_shortlink( $text, $title, $before, $after );
 }
-
-add_action( 'wp', 'wpbitly_shortcode' );

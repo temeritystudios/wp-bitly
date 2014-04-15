@@ -33,7 +33,7 @@ if ( ! defined( 'WPINC' ) )
     die;
 
 
-define( 'WPBITLY_VERSION',  '2.1-working' );
+define( 'WPBITLY_VERSION',  '2.1' );
 
 define( 'WPBITLY_FILE', __FILE__ );
 define( 'WPBITLY_DIR',  WP_PLUGIN_DIR.'/'.basename( dirname( __FILE__ ) ) );
@@ -186,13 +186,13 @@ final class _wpbitly
     public function action_filters()
     {
 
-        // Yada, yada (nothing to see here folks).
         add_action( 'init', array( $this, 'load_plugin_textdomain' ) );
 
         $basename = plugin_basename( __FILE__ );
         add_filter( 'plugin_action_links_' . $basename, array( $this, 'add_action_links' ) );
 
-        // Bingo, bango (ahhh, there's the stuff).
+        add_action( 'admin_bar_menu', 'wp_admin_bar_shortlink_menu', 90 );
+
         if ( isset( $this->options['authorized'] ) && $this->options['authorized'] )
         {
             add_action( 'save_post', 'wpbitly_generate_shortlink' );
