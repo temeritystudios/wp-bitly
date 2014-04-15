@@ -30,40 +30,26 @@ function wpbitly_api( $api_call )
 
 
 /**
- * WP Bit.ly wrapper for cURL - this method relies on the ability to use cURL
- * or file_get_contents. If cURL is not available and allow_url_fopen is set
- * to false this method will fail and the plugin will not be able to generate
- * shortlinks.
+ * WP Bit.ly wrapper for wp_remote_get. Why have I been using cURL when WordPress already does this?
+ * Thanks to Otto, who while teaching someone else how to do it right unwittingly taught me the right
+ * way as well.
  *
- * @since   0.1
+ * @since   2.1
  * @param   string  $url    The API endpoint we're contacting
  * @return  bool|array      False on failure, array on success
  */
 
-function wpbitly_curl( $url = '' )
+function wpbitly_get( $url = '' )
 {
 
     // Say $url phonetically. Is it Yer'l or Earl?
     if ( empty( $url ) )
         return false;
 
-    if ( function_exists( 'curl_init' ) )
-    {
+    $the = wp_remote_get( $url );
 
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_URL, $url );
-        $result = curl_exec($ch);
-        curl_close($ch);
-
-    }
-    else
-    {
-        $result = file_get_contents( $url );
-    }
-
-    if ( ! empty( $result ) )
-        return json_decode( $result, true );
+    if ( ! empty( $result ) && '200' == $the['response']['code'] )
+        return json_decode( $the['body'], true );
 
     return false;
 
@@ -116,19 +102,19 @@ function wpbitly_generate_shortlink( $post_id )
     // Link to be generated
     $permalink = get_permalink( $post_id );
     $shortlink = get_post_meta( $post_id, '_wpbitly', true );
-
+$shortlink = '';
     if ( !empty( $shortlink ) )
     { // We shouldn't get here if there's already a shortlink, but if we did, let's verify it.
         $url = sprintf( wpbitly_api( 'expand' ), $wpbitly->options['oauth_token'], $shortlink );
-        $response = wpbitly_curl( $url );
+        $response = wpbitly_get( $url );
 
         if ( wpbitly_good_response( $response ) && $permalink == $response['data']['expand'][0]['long_url'] )
             return $shortlink;
     }
 
     // Get Shorty.
-    $url = sprintf( wpbitly_api( 'shorten' ), $wpbitly->options['oauth_token'], urlencode( $permalink ) );
-    $response = wpbitly_curl( $url );
+    $url = sprintf( wpbitly_api( 'shorten' ), $wpbitly->options['oauth_token'], urlencode( $permalink ) ); md( $url );
+    $response = wpbitly_get( $url );
 
     if ( wpbitly_good_response( $response ) )
     { // We caught something!!
@@ -166,9 +152,9 @@ function wpbitly_get_shortlink( $shortlink, $post_id = '' )
 
 
     { // We have a $post_id, lets get the shortlink.
-        $shortlink = get_post_meta( $post_id, '_wpbitly', true );
+        //$shortlink = get_post_meta( $post_id, '_wpbitly', true );
 
-        if ( empty( $shortlink ) )
+        //if ( empty( $shortlink ) )
             $shortlink = wpbitly_generate_shortlink( $post_id );
     }
 
@@ -184,7 +170,7 @@ function wpbitly_get_shortlink( $shortlink, $post_id = '' )
  * @since   0.1
  * @param   array   $atts   I suppose we could let this accept the post->ID? Maybe later.
  */
-function wpbitly_shortcode( $atts )
+function wpbitly_shortcode( $atts = array() )
 {
     global $post;
 
@@ -200,3 +186,4 @@ function wpbitly_shortcode( $atts )
     return the_shortlink( $text, $title, $before, $after );
 }
 
+add_action( 'wp', 'wpbitly_shortcode' );

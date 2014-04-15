@@ -189,7 +189,7 @@ class wpbitly_admin
             $input['oauth_token'] = wp_filter_nohtml_kses( $input['oauth_token'] );
 
             $url = sprintf( wpbitly_api( 'user/info' ), $input['oauth_token'] );
-            $response = wpbitly_curl( $url );
+            $response = wpbitly_get( $url );
 
             $input['authorized'] = ( wpbitly_good_response( $response ) && isset( $response['data']['member_since'] ) ) ? true : false;
 
@@ -256,7 +256,7 @@ class wpbitly_admin
 
         { // Look for a clicks response
             $url = sprintf( wpbitly_api( 'link/clicks' ), $wpbitly->options['oauth_token'], $shortlink );
-            $response = wpbitly_curl( $url );
+            $response = wpbitly_get( $url );
 
             if ( wpbitly_good_response( $response ) )
                 $clicks = $response['data']['link_clicks'];
@@ -264,7 +264,7 @@ class wpbitly_admin
 
         { // Look for referring domains metadata
             $url = sprintf( wpbitly_api( 'link/refer' ), $wpbitly->options['oauth_token'], $shortlink );
-            $response = wpbitly_curl( $url );
+            $response = wpbitly_get( $url );
 
             if ( wpbitly_good_response( $response ) )
                 $refer = $response['data']['referring_domains'];
