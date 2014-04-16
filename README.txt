@@ -2,15 +2,15 @@
 Contributors: delayedinsanity, chipbennett
 Tags: shortlink, short, link, bitly, url, shortener, social, media, twitter, share
 Requires at least: 3.8.1
-Tested up to: 3.8.1
-Stable tag: 2.0
+Tested up to: 3.8.3
+Stable tag: 2.1
 
 Use Bitly generated shortlinks for all your WordPress posts and pages, including custom post types.
 
 
 == Description ==
 
-WP Bitly is a plugin you'll remember for how easy it was to install and configure. Even [WPBeginner](http://www.wpbeginner.com/blueprint/wp-bitly/) uses it!
+WP Bitly is the easiest way to replace the internally generated WordPress shortlinks with Bitly generated shortlinks. Even [WPBeginner](http://www.wpbeginner.com/blueprint/wp-bitly/) uses it (this isn't an endorsement from them, I found the article almost by accident)!
 
 Provide WP Bitly with an authorization token (automatically generated for you by Bitly), tell it which post types you'd like to generate shortlinks for, and forget about it! WP Bitly does the rest for you.
 
@@ -25,7 +25,7 @@ WP Bitly also provides some insights (via a metabox on your edit post screen) as
 
 = This Plugin is GPL =
 
-*Someone out there is selling a plugin with the exact same name as WP Bitly, from a domain of the same name. I am not claiming it's a rip off of my plugin, as I have no idea to be fair, but it **is not WP Bitly**. This plugin is open source and free, and will remain so forever.
+*Someone out there is selling a plugin with the exact same name as WP Bitly. Just to be clear, it is not the same plugin. This plugin is open source and free, and will remain so forever.
 
 
 == Installation ==
@@ -68,6 +68,8 @@ Sure can! Just use our handy dandy shortcode `[wpbitly]` and shazam! The shortco
 
 == Changelog ==
 
+= 2.1 =
+* Replaced internal use of cURL with wp_remote_get
 = 2.0 =
 * Updated for WordPress 3.8.1
 * Updated Bitly API to V3

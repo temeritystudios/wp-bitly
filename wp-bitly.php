@@ -19,7 +19,7 @@
  * Plugin Name:       WP Bitly
  * Plugin URI:        http://wordpress.org/plugins/wp-bitly
  * Description:       Whether you're sharing links on social media like Twitter, or sending someone a link from your smart phone, short links make life much easier. WP Bit.ly simplifies the process for you.
- * Version:           2.1-working
+ * Version:           2.2.1
  * Author:            <a href="http://mark.watero.us/">Mark Waterous</a> & <a href="http://www.chipbennett.net/">Chip Bennett</a>
  * Text Domain:       wp-bitly
  * License:           GPL-2.0+
@@ -33,7 +33,7 @@ if ( ! defined( 'WPINC' ) )
     die;
 
 
-define( 'WPBITLY_VERSION',  '2.1' );
+define( 'WPBITLY_VERSION',  '2.2.1' );
 
 define( 'WPBITLY_FILE', __FILE__ );
 define( 'WPBITLY_DIR',  WP_PLUGIN_DIR.'/'.basename( dirname( __FILE__ ) ) );
@@ -134,9 +134,7 @@ final class _wpbitly
     public function include_files()
     {
         require_once( WPBITLY_DIR . '/includes/functions.php' );
-
-        if ( is_admin() )
-            require_once( WPBITLY_DIR . '/includes/admin/class.wpbitly-admin.php' );
+        if ( is_admin() ) require_once( WPBITLY_DIR . '/includes/class.wpbitly-admin.php' );
     }
 
 
@@ -191,7 +189,7 @@ final class _wpbitly
         $basename = plugin_basename( __FILE__ );
         add_filter( 'plugin_action_links_' . $basename, array( $this, 'add_action_links' ) );
 
-        add_action( 'admin_bar_menu', 'wp_admin_bar_shortlink_menu', 90 );
+        //add_action( 'admin_bar_menu', 'wp_admin_bar_shortlink_menu', 90 );
 
         if ( isset( $this->options['authorized'] ) && $this->options['authorized'] )
         {
