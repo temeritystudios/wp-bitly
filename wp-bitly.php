@@ -2,9 +2,8 @@
 /**
  * WP Bitly
  *
- * This plugin can be used to generate short links for your websites posts, pages,
- * and any other custom post type that you would like it to interact with. Extremely
- * compact and easy to set up, give it your Bit.ly oAuth token and you're set!
+ * This plugin can be used to generate shortlinks for your websites posts, pages, and custom post types.
+ * Extremely lightweight and easy to set up, give it your Bitly oAuth token and go!
  *
  * ಠ_ಠ
  *
@@ -13,13 +12,13 @@
  * @author    Chip Bennett
  * @license   GPL-2.0+
  * @link      http://wordpress.org/plugins/wp-bitly
- * @copyright 2014 Mark Waterous
+ * @copyright 2014 Mark Waterous & Chip Bennett
  *
  * @wordpress-plugin
  * Plugin Name:       WP Bitly
  * Plugin URI:        http://wordpress.org/plugins/wp-bitly
- * Description:       Whether you're sharing links on social media like Twitter, or sending someone a link from your smart phone, short links make life much easier. WP Bit.ly simplifies the process for you.
- * Version:           2.2.1
+ * Description:       WP Bitly can be used to generate shortlinks for your websites posts, pages, and custom post types. Extremely lightweight and easy to set up, give it your Bitly oAuth token and go!
+ * Version:           2.2.5
  * Author:            <a href="http://mark.watero.us/">Mark Waterous</a> & <a href="http://www.chipbennett.net/">Chip Bennett</a>
  * Text Domain:       wp-bitly
  * License:           GPL-2.0+
@@ -33,16 +32,18 @@ if ( ! defined( 'WPINC' ) )
     die;
 
 
-define( 'WPBITLY_VERSION',  '2.2.1' );
+define( 'WPBITLY_VERSION',  '2.2.5' );
 
-define( 'WPBITLY_FILE', __FILE__ );
 define( 'WPBITLY_DIR',  WP_PLUGIN_DIR.'/'.basename( dirname( __FILE__ ) ) );
 define( 'WPBITLY_URL',  plugins_url().'/'.basename( dirname( __FILE__ ) ) );
 
+define( 'WPBITLY_LOG', WPBITLY_DIR . '/log/debug.txt' );
+define( 'WPBITLY_ERROR', __( 'WP Bitly Error: No such option %1$s','wp-bitly' ) );
 
+define( 'WPBITLY_BITLY_API', 'https://api-ssl.bitly.com' );
 
 /**
- * The primary controller class for everything wonderful that WP Bit.ly does.
+ * The primary controller class for everything wonderful that WP Bitly does.
  * We're not sure entirely what that means yet; if you figure it out, please
  * let us know and we'll say something snazzy about it here.
  *
@@ -51,8 +52,7 @@ define( 'WPBITLY_URL',  plugins_url().'/'.basename( dirname( __FILE__ ) ) );
  * @package wp-bitly
  * @author  Mark Waterous <mark@watero.us>
  */
-final class _wpbitly
-{
+final class WP_Bitly {
 
     /**
      * @var $_instance An instance of ones own instance
@@ -60,35 +60,33 @@ final class _wpbitly
     private static $_instance;
 
     /**
-     * @var string Static-ly accessible and globally similar
+     * @var string Used for our text domain, and other goodness
      */
     public static $slug = 'wp-bitly';
 
     /**
-     * @var array Options, everybody has them.
+     * @var array The WP Bitly configuration is stored in here
      */
-    public $options = array();
+    private $_options = array();
 
 
     /**
-     * This creates and returns a single instance of wpbitly.
+     * This creates and returns a single instance of WP_Bitly.
      *
      * If you haven't seen a singleton before, visit any Starbucks; they're the ones sitting on expensive laptops
      * in the corner drinking a macchiato and pretending to write a book. They'll always be singletons.
      *
-     * @since   2.0
+     * @since 2.0
      * @static
-     * @uses    _wpbitly::populate_options()     To create our options array.
-     * @uses    _wpbitly::includes_files()       To do something that sounds a lot like what it sounds like.
-     * @uses    _wpbitly::check_for_upgrade()    You run your updates, right?
-     * @uses    _wpbitly::action_filters()       To set up any necessary WordPress hooks.
-     * @return  _wpbitly
+     * @uses    WP_Bitly::populate_options()     To create our options array.
+     * @uses    WP_Bitly::includes_files()       To do something that sounds a lot like what it sounds like.
+     * @uses    WP_Bitly::check_for_upgrade()    You run your updates, right?
+     * @uses    WP_Bitly::action_filters()       To set up any necessary WordPress hooks.
+     * @return  WP_Bitly
      */
-    public static function get_in()
-    {
+    public static function get_in() {
 
-        if ( !isset( self::$_instance ) && !( self::$_instance instanceof _wpbitly ) )
-        {
+        if ( !isset( self::$_instance ) && !( self::$_instance instanceof WP_Bitly ) ) {
             self::$_instance = new self;
             self::$_instance->populate_options();
             self::$_instance->include_files();
@@ -97,31 +95,59 @@ final class _wpbitly
         }
 
         return self::$_instance;
-
     }
 
 
     /**
-     * This handles setting up some defaults and populating the local property
-     * for use elsewhere around the plugin. Don't modify options without making sure
-     * they're up to date.
+     * Populate WP_Bitly::$options with the configuration settings stored in 'wpbitly-options',
+     * using an array of default settings as our fall back.
      *
-     * @since   2.0
+     * @since 2.0
      */
-    public function populate_options()
-    {
+    public function populate_options() {
 
         $defaults = apply_filters( 'wpbitly_default_options', array(
             'version'       => WPBITLY_VERSION,
             'oauth_token'   => '',
             'post_types'    => array( 'post', 'page' ),
             'authorized'    => false,
+            'debug'         => false,
         ) );
 
-        $this->options = wp_parse_args(
+        $this->_options = wp_parse_args(
             get_option( 'wpbitly-options' ),
             $defaults );
 
+    }
+
+
+    /**
+     * Access to our WP_Bitly::$_options array.
+     *
+     * @since 2.2.5
+     * @param  $option string The name of the option we need to retrieve
+     * @return         mixed  Returns the option
+     */
+    public function get_option( $option ) {
+        if ( !isset( $this->_options[ $option ] ) )
+            trigger_error( sprintf( WPBITLY_ERROR, ' <code>' . $option . '</code>' ), E_USER_ERROR );
+
+        return $this->_options[ $option ];
+    }
+
+
+    /**
+     * Sets a single WP_Bitly::$_options value on the fly
+     *
+     * @since 2.2.5
+     * @param $option string The name of the option we're setting
+     * @param $value  mixed  The value, could be bool, string, array
+     */
+    public function set_option ( $option, $value ) {
+        if ( !isset( $this->_options[ $option ] ) )
+            trigger_error( sprintf( WPBITLY_ERROR, ' <code>' . $option . '</code>' ), E_USER_ERROR );
+
+        $this->_options[ $option ] = $value;
     }
 
 
@@ -131,10 +157,10 @@ final class _wpbitly
      *
      * @since   2.0
      */
-    public function include_files()
-    {
+    public function include_files() {
         require_once( WPBITLY_DIR . '/includes/functions.php' );
-        if ( is_admin() ) require_once( WPBITLY_DIR . '/includes/class.wpbitly-admin.php' );
+        if ( is_admin() )
+            require_once( WPBITLY_DIR . '/includes/class.wpbitly-admin.php' );
     }
 
 
@@ -144,25 +170,21 @@ final class _wpbitly
      *
      * @since   2.0
      */
-    public function check_for_upgrade()
-    {
-        // We don't need to compare versions this time round, because we've moved the dash up a smidge.
-        $upgrade_needed = get_option( 'wpbitly_options' );
-        if ( $upgrade_needed !== false )
-        {
+    public function check_for_upgrade() {
 
-            // If for some reason that array doesn't exist, then we don't have anything to work on.
-            if ( isset( $upgrade_needed['post_types'] ) && is_array( $upgrade_needed['post_types'] ) )
-            {
+        // We only have to upgrade if it's pre v2.0
+        $upgrade_needed = get_option( 'wpbitly_options' );
+        if ( $upgrade_needed !== false ) {
+
+            if ( isset( $upgrade_needed['post_types'] ) && is_array( $upgrade_needed['post_types'] ) ) {
                 $post_types = apply_filters( 'wpbitly_allowed_post_types', get_post_types( array( 'public' => true ) ) );
 
-                foreach ( $upgrade_needed['post_types'] as $key => $pt )
-                {
+                foreach ( $upgrade_needed['post_types'] as $key => $pt ) {
                     if ( ! in_array( $pt, $post_types ) )
                         unset( $upgrade_needed['post_types'][$key] );
                 }
 
-                $this->options['post_types'] = $upgrade_needed['post_types'];
+                $this->set_option( 'post_types', $upgrade_needed['post_types'] );
             }
 
             delete_option( 'wpbitly_options' );
@@ -173,38 +195,27 @@ final class _wpbitly
 
 
     /**
-     * Hook any necessary WordPress actions or filters that we'll be needing to communicate
-     * with in order to make the plugin work its magic. This method also registers our
-     * super amazing slice of shortcode.
+     * Hook any necessary WordPress actions or filters that we'll be needing in order to make
+     * the plugin work its magic. This method also registers our super amazing slice of shortcode.
      *
-     * @since   2.0
-     * @TODO    Instead of arbitrarily and invisibly deactivating the Jetpack module, it seems polite to have this ask.
-     * @TODO    Until that gets added, move over Jetpack, WP Bit.ly owns this corner.
+     * @since 2.0
+     * @todo  Instead of arbitrarily deactivating the Jetpack module, it might be polite to ask.
      */
-    public function action_filters()
-    {
+    public function action_filters() {
+        global $post;
+        add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'add_action_links' ) );
+        add_filter( 'pre_get_shortlink', 'wpbitly_get_shortlink' );
 
         add_action( 'init', array( $this, 'load_plugin_textdomain' ) );
 
-        $basename = plugin_basename( __FILE__ );
-        add_filter( 'plugin_action_links_' . $basename, array( $this, 'add_action_links' ) );
-
         //add_action( 'admin_bar_menu', 'wp_admin_bar_shortlink_menu', 90 );
 
-        if ( isset( $this->options['authorized'] ) && $this->options['authorized'] )
-        {
-            add_action( 'save_post', 'wpbitly_generate_shortlink' );
-            add_filter( 'pre_get_shortlink', 'wpbitly_get_shortlink' );
-        }
+        add_shortcode( 'wpbitly', 'wpbitly_shortlink' );
 
-        add_shortcode( 'wpbitly', 'wpbitly_shortcode' );
+        if( class_exists( 'Jetpack' ) ) {
 
-        // @TODO This is where we're being impolite.
-        if( class_exists( 'Jetpack' ) )
-        {
-            add_filter( 'jetpack_get_available_modules', '_sorry_thats_life_wpme' );
-            function _sorry_thats_life_wpme( $modules )
-            {
+            add_filter( 'jetpack_get_available_modules', '_bad_wpme' );
+            function _bad_wpme( $modules ) {
                 unset( $modules['shortlinks'] );
                 return $modules;
             }
@@ -221,13 +232,10 @@ final class _wpbitly
      * @param   $links An array returned by WordPress with our plugin action links
      * @return  array The slightly modified 'rray.
      */
-    public function add_action_links( $links )
-    {
+    public function add_action_links( $links ) {
 
         return array_merge(
-            array(
-                'settings' => '<a href="' . admin_url( 'options-writing.php' ) . '">' . __( 'Settings', 'wp-bitly' ) . '</a>'
-            ),
+            array( 'settings' => '<a href="' . admin_url( 'options-writing.php' ) . '">' . __( 'Settings', WP_Bitly::$slug ) . '</a>' ),
             $links
         );
 
@@ -239,19 +247,17 @@ final class _wpbitly
      *
      * @since   2.0
      */
-    public function load_plugin_textdomain()
-    {
+    public function load_plugin_textdomain() {
 
-        $lang_dir = WPBITLY_DIR . '/languages/';
-        $lang_dir = apply_filters( 'wpbitly_languages_directory', $lang_dir );
+        $languages = apply_filters( 'wpbitly_languages_dir', WPBITLY_DIR . '/languages/' );
+        $locale    = apply_filters( 'plugin_locale', get_locale(), self::$slug );
+        $mofile    = $languages . $locale . '.mo';
 
-        $locale = apply_filters( 'plugin_locale', get_locale(), self::$slug );
-        $mofile = $lang_dir . self::$slug . $locale . '.mo';
-
-        if ( file_exists( $mofile ) )
+        if ( file_exists( $mofile ) ) {
             load_textdomain( self::$slug, $mofile );
-        else
-            load_plugin_textdomain( self::$slug, false, $lang_dir );
+        } else {
+            load_plugin_textdomain( self::$slug, false, $languages );
+        }
 
     }
 
@@ -260,16 +266,16 @@ final class _wpbitly
 
 
 /**
- * Call this in place of _wpbitly::get_in()
+ * Call this in place of WP_Bitly::get_in()
  * It's shorthand.
  * Makes life easier.
- * In fact, the phpdoc block is bigger than the function itself.
+ * In fact, the phpDocumentor block is bigger than the function itself.
  *
- * @return _wpbitly
+ * @return WP_Bitly
  */
 function wpbitly()
 {
-    return _wpbitly::get_in();
+    return WP_Bitly::get_in(); // in.
 }
 
 wpbitly();

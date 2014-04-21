@@ -1,9 +1,9 @@
 === Plugin Name ===
 Contributors: delayedinsanity, chipbennett
 Tags: shortlink, short, link, bitly, url, shortener, social, media, twitter, share
-Requires at least: 3.8.1
-Tested up to: 3.8.3
-Stable tag: 2.1
+Requires at least: 3.9
+Tested up to: 3.9
+Stable tag: 2.2.5
 
 Use Bitly generated shortlinks for all your WordPress posts and pages, including custom post types.
 
@@ -32,9 +32,9 @@ WP Bitly also provides some insights (via a metabox on your edit post screen) as
 
 = Upgrading =
 
-Older versions of WP Bitly used a beta API provided by Bitly.com that required a username and API key. The new version of WP Bitly uses the most up to date Bitly API which only requires a single OAuth token to generate short links.
+Older versions of WP Bitly used a beta API provided by Bitly that required a username and API key. The more recent versions of WP Bitly use the V3 Bitly API which only requires a single OAuth token to generate short links.
 
-You will need to upgrade from the WordPress dashboard, and navigate to the *Dashboard >> Settings >> Writing* page to add your new OAuth Token.
+You will need to upgrade from the WordPress dashboard, and navigate to the *Dashboard >> Settings >> Writing* page to add your new OAuth Token if you're coming from a version prior to 2.0.
 
 = Add New Plugin =
 
@@ -49,27 +49,33 @@ You will need to upgrade from the WordPress dashboard, and navigate to the *Dash
 
 = After installation, do I need to update all my posts for short links to be created? =
 
-No. The first time a shortlink is request for a particular post, WP Bitly will automatically generate one.
+No. The first time a shortlink is requested for a particular post, WP Bitly will automatically generate one.
 
 = What happens if I change a posts permalink? =
 
 WP Bitly will verify the shortlink when it's requested and update as necessary all on its own.
 
-= Can I include the shortlink in a post? =
+= Can I include the shortlink directly in a post? =
 
-Sure can! Just use our handy dandy shortcode `[wpbitly]` and shazam! The shortcode accepts all the same arguments as the_shortlink().
+Sure can! Just use our handy dandy shortcode `[wpbitly]` and shazam! The shortcode accepts all the same arguments as the_shortlink(). You can also set "post_id" directly if you wish.
 
 = How do I include a shortlink using PHP? =
 
-`<?php the_shortlink(); // shortcode shweetness. ?>`
+`<?php wpbitly_shortlink(); // shortcode shweetness. ?>`
 
 *(You don't have to include the php comment, but you can if you want.)*
 
 
 == Changelog ==
 
-= 2.1 =
+= 2.2.5 =
+* Added the ability to turn debugging on or off, to aid in tracking down issues
+* Updated to WordPress coding standards
+* Removed `wpbitly_generate_shortlink()` from save_post, as filtering pre_get_shortlink seems to be adequate
+* Temporarily removed admin bar shortlink button (sorry! it's quirky)
+= 2.2.3 =
 * Replaced internal use of cURL with wp_remote_get
+* Fixed a bug where the OAuth token wouldn't update
 = 2.0 =
 * Updated for WordPress 3.8.1
 * Updated Bitly API to V3
