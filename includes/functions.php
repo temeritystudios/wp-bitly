@@ -24,7 +24,7 @@ function wpbitly_debug_log( $towrite, $message, $bypass = true ) {
 
     fwrite( $log, '# [ ' . date( 'F j, Y, g:i a' ) . " ]\n" );
     fwrite( $log, '# [ ' . $message . " ]\n\n" );
-    fwrite( $log, ( is_array( $towrite ) ? print_r( $towrite, true ) : $towrite ) );
+    fwrite( $log, ( is_array( $towrite ) ? print_r( $towrite, true ) : var_dump( $towrite ) ) );
     fwrite( $log, "\n\n\n" );
 
     fclose( $log );
@@ -68,27 +68,10 @@ function wpbitly_api( $api_call ) {
 
 function wpbitly_get( $url ) {
 
-    $the = wp_remote_get( $url );
+    $the = wp_remote_get( $url, array( 'timeout' => '30', ) );
 
     if ( is_array( $the ) && '200' == $the['response']['code'] )
         return json_decode( $the['body'], true );
-
-}
-
-
-/**
- * Check our response for validity before proceeding.
- *
- * @since   2.0
- * @param   array   $response   This should be a json_decode()'d array
- * @return  bool
- */
-function wpbitly_good_response( $response )
-{
-    if ( !is_array( $response ) )
-        return false;
-
-    return ( isset( $response['status_code'] ) && $response['status_code'] == 200 ) ? true : false;
 }
 
 
@@ -117,9 +100,6 @@ function wpbitly_generate_shortlink( $post_id ) {
     if ( !in_array( $post_status, array( 'publish', 'future', 'private') ) )
         return;
 
-        if ( !in_array( $post_status, array( 'publish', 'future', 'private') ) )
-            return false;
-    }
 
     // Link to be generated
     $permalink = get_permalink( $post_id );
@@ -189,8 +169,7 @@ function wpbitly_get_shortlink( $shortlink, $post_id = 0 ) {
  * @since   0.1
  * @param   array $atts Default shortcode attributes.
  */
-function wpbitly_shortlink( $atts = array() )
-{
+function wpbitly_shortlink( $atts = array() ) {
 
     $post = get_post();
 

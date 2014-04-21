@@ -160,7 +160,7 @@ final class WP_Bitly {
     public function include_files() {
         require_once( WPBITLY_DIR . '/includes/functions.php' );
         if ( is_admin() )
-            require_once( WPBITLY_DIR . '/includes/class.wpbitly-admin.php' );
+            require_once( WPBITLY_DIR . '/includes/class.wp-bitly-admin.php' );
     }
 
 
@@ -272,8 +272,7 @@ final class WP_Bitly {
  *
  * @return WP_Bitly
  */
-function wpbitly()
-{
+function wpbitly() {
     return WP_Bitly::get_in(); // in.
 }
 
