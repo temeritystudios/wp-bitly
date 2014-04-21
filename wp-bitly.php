@@ -202,12 +202,11 @@ final class WP_Bitly {
      * @todo  Instead of arbitrarily deactivating the Jetpack module, it might be polite to ask.
      */
     public function action_filters() {
-        global $post;
+
         add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'add_action_links' ) );
         add_filter( 'pre_get_shortlink', 'wpbitly_get_shortlink' );
 
         add_action( 'init', array( $this, 'load_plugin_textdomain' ) );
-
         //add_action( 'admin_bar_menu', 'wp_admin_bar_shortlink_menu', 90 );
 
         add_shortcode( 'wpbitly', 'wpbitly_shortlink' );

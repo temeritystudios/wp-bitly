@@ -52,7 +52,6 @@ function wpbitly_api( $api_call ) {
     if ( !array_key_exists( $api_call, $api_links ) )
         trigger_error( __( 'WP Bitly Error: No such API endpoint.', WP_Bitly::$slug ) );
 
-
     return WPBITLY_BITLY_API . $api_links[ $api_call ];
 }
 
@@ -74,6 +73,22 @@ function wpbitly_get( $url ) {
     if ( is_array( $the ) && '200' == $the['response']['code'] )
         return json_decode( $the['body'], true );
 
+}
+
+
+/**
+ * Check our response for validity before proceeding.
+ *
+ * @since   2.0
+ * @param   array   $response   This should be a json_decode()'d array
+ * @return  bool
+ */
+function wpbitly_good_response( $response )
+{
+    if ( !is_array( $response ) )
+        return false;
+
+    return ( isset( $response['status_code'] ) && $response['status_code'] == 200 ) ? true : false;
 }
 
 
@@ -102,6 +117,9 @@ function wpbitly_generate_shortlink( $post_id ) {
     if ( !in_array( $post_status, array( 'publish', 'future', 'private') ) )
         return;
 
+        if ( !in_array( $post_status, array( 'publish', 'future', 'private') ) )
+            return false;
+    }
 
     // Link to be generated
     $permalink = get_permalink( $post_id );
@@ -202,3 +220,4 @@ function wpbitly_shortlink( $atts = array() )
 
     return $link;
 }
+
