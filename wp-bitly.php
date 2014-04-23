@@ -18,7 +18,7 @@
  * Plugin Name:       WP Bitly
  * Plugin URI:        http://wordpress.org/plugins/wp-bitly
  * Description:       WP Bitly can be used to generate shortlinks for your websites posts, pages, and custom post types. Extremely lightweight and easy to set up, give it your Bitly oAuth token and go!
- * Version:           2.2.5
+ * Version:           2.2.6
  * Author:            <a href="http://mark.watero.us/">Mark Waterous</a> & <a href="http://www.chipbennett.net/">Chip Bennett</a>
  * Text Domain:       wp-bitly
  * License:           GPL-2.0+
@@ -32,7 +32,7 @@ if ( ! defined( 'WPINC' ) )
     die;
 
 
-define( 'WPBITLY_VERSION',  '2.2.5' );
+define( 'WPBITLY_VERSION',  '2.2.6' );
 
 define( 'WPBITLY_DIR',  WP_PLUGIN_DIR.'/'.basename( dirname( __FILE__ ) ) );
 define( 'WPBITLY_URL',  plugins_url().'/'.basename( dirname( __FILE__ ) ) );
@@ -204,6 +204,8 @@ final class WP_Bitly {
     public function action_filters() {
 
         add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'add_action_links' ) );
+
+        add_action( 'save_post',         'wpbitly_generate_shortlink' );
         add_filter( 'pre_get_shortlink', 'wpbitly_get_shortlink' );
 
         add_action( 'init', array( $this, 'load_plugin_textdomain' ) );

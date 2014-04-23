@@ -86,9 +86,11 @@ function wpbitly_get( $url ) {
 function wpbitly_generate_shortlink( $post_id ) {
 
     $wpbitly = wpbitly();
-    $token = $wpbitly->get_option( 'oauth_token' );
 
-    if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || !$wpbitly->get_option( 'authorized' ) )
+    $token      = $wpbitly->get_option( 'oauth_token' );
+    $post_types = $wpbitly->get_option( 'post_types' );
+
+    if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || !$wpbitly->get_option( 'authorized' )  )
         return;
 
     // Do we need to generate a shortlink for this post yet?
@@ -96,8 +98,9 @@ function wpbitly_generate_shortlink( $post_id ) {
         $post_id = $parent;
 
     $post_status = get_post_status( $post_id );
+    $post_type   = get_post_type( $post_id );
 
-    if ( !in_array( $post_status, array( 'publish', 'future', 'private') ) )
+    if ( !in_array( $post_status, array( 'publish', 'future', 'private') ) || !in_array( $post_type, $post_types ) )
         return;
 
 
@@ -139,25 +142,28 @@ function wpbitly_generate_shortlink( $post_id ) {
  * @return  string            A shortlink
  */
 function wpbitly_get_shortlink( $shortlink, $post_id = 0 ) {
-    global $post;
+
+    $post = get_post( $post_id );
 
     $wpbitly = wpbitly();
+
     $authorized = $wpbitly->get_option( 'authorized' );
+    $post_types = $wpbitly->get_option( 'post_types' );
 
-    if ( !$authorized )
-        return $shortlink;
+    if ( $authorized && in_array( $post->post_type, $post_types ) ) {
+        // Needs post id.
+        if ( $post_id == 0 && is_object( $post ) ) {
+            $post_id = $post->ID;
+        } else {
+            return $shortlink;
+        }
 
-    // Needs post id.
-    if ( $post_id == 0 && is_object( $post ) ) {
-        $post_id = $post->ID;
-    } else {
-        return $shortlink;
+        $shortlink = get_post_meta( $post_id, '_wpbitly', true );
+
+        if ( !$shortlink )
+            $shortlink = wpbitly_generate_shortlink( $post_id );
+
     }
-
-    $shortlink = get_post_meta( $post_id, '_wpbitly', true );
-
-    if ( !$shortlink )
-        $shortlink = wpbitly_generate_shortlink( $post_id );
 
     return $shortlink;
 }
