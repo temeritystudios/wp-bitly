@@ -50,7 +50,7 @@ function wpbitly_api( $api_call ) {
     );
 
     if ( !array_key_exists( $api_call, $api_links ) )
-        trigger_error( __( 'WP Bitly Error: No such API endpoint.', WP_Bitly::$slug ) );
+        trigger_error( __( 'WP Bitly Error: No such API endpoint.', 'wp-bitly' ) );
 
     return WPBITLY_BITLY_API . $api_links[ $api_call ];
 }
@@ -87,29 +87,30 @@ function wpbitly_generate_shortlink( $post_id ) {
 
     $wpbitly = wpbitly();
 
-    $token      = $wpbitly->get_option( 'oauth_token' );
-    $post_types = $wpbitly->get_option( 'post_types' );
-
-    if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || !$wpbitly->get_option( 'authorized' )  )
+	// Avoid creating shortlinks during an autosave
+    if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )
         return;
 
-    // Do we need to generate a shortlink for this post yet?
-    if ( $parent = wp_is_post_revision( $post_id ) )
-        $post_id = $parent;
+	// or for revisions
+	if ( wp_is_post_revision( $post_id ) )
+		return;
 
-    $post_status = get_post_status( $post_id );
-    $post_type   = get_post_type( $post_id );
+	// Token hasn't been verified, bail
+	if ( !$wpbitly->get_option( 'authorized' ) )
+		return;
 
-    if ( !in_array( $post_status, array( 'publish', 'future', 'private') ) || !in_array( $post_type, $post_types ) )
+	// Verify this is a post we want to generate short links for
+	if ( !in_array( get_post_type( $post_id ), $wpbitly->get_option( 'post_types' ) ) && !in_array( get_post_status( $post_id ), array( 'publish', 'future', 'private' ) ) )
         return;
 
 
-    // Link to be generated
-    $permalink = get_permalink( $post_id );
+	// We made it this far? Let's get a shortlink
+	$permalink = get_permalink( $post_id );
     $shortlink = get_post_meta( $post_id, '_wpbitly', true );
+	$token     = $wpbitly->get_option( 'oauth_token' );
 
     if ( !empty( $shortlink ) ) {
-        $url = sprintf( wpbitly_api( 'expand' ), $token, $shortlink );
+	    $url = sprintf( wpbitly_api( 'expand' ), $token, $shortlink );
         $response = wpbitly_get( $url );
 
         wpbitly_debug_log( $response, '/expand/' );
@@ -118,7 +119,6 @@ function wpbitly_generate_shortlink( $post_id ) {
             return $shortlink;
     }
 
-    // Get Shorty.
     $url = sprintf( wpbitly_api( 'shorten' ), $token, urlencode( $permalink ) );
     $response = wpbitly_get( $url );
 
@@ -141,31 +141,19 @@ function wpbitly_generate_shortlink( $post_id ) {
  * @param   int    $post_id   Current $post->ID, or 0 for the current post.
  * @return  string            A shortlink
  */
-function wpbitly_get_shortlink( $shortlink, $post_id = 0 ) {
+function wpbitly_get_shortlink( $original, $post_id ) {
 
-    $post = get_post( $post_id );
+	if ( 0 == $post_id ) {
+		$post = get_post();
+		$post_id = $post->ID;
+	}
 
-    $wpbitly = wpbitly();
+	$shortlink = get_post_meta( $post_id, '_wpbitly', true );
 
-    $authorized = $wpbitly->get_option( 'authorized' );
-    $post_types = $wpbitly->get_option( 'post_types' );
+	if ( !$shortlink )
+		$shortlink = wpbitly_generate_shortlink( $post_id );
 
-    if ( $authorized && in_array( $post->post_type, $post_types ) ) {
-        // Needs post id.
-        if ( $post_id == 0 && is_object( $post ) ) {
-            $post_id = $post->ID;
-        } else {
-            return $shortlink;
-        }
-
-        $shortlink = get_post_meta( $post_id, '_wpbitly', true );
-
-        if ( !$shortlink )
-            $shortlink = wpbitly_generate_shortlink( $post_id );
-
-    }
-
-    return $shortlink;
+	return ( $shortlink ) ? $shortlink : $original;
 }
 
 
@@ -189,20 +177,21 @@ function wpbitly_shortlink( $atts = array() ) {
 
     extract( shortcode_atts( $defaults, $atts ) );
 
+	$permalink = get_permalink( $post_id );
+	$shortlink = wp_get_shortlink( $permalink, $post_id );
+
     if ( empty( $text ) )
-        $text = __( 'This is the short link.', WP_Bitly::$slug );
+        $text = $shortlink;
 
     if ( empty( $title ) )
         $title = the_title_attribute( array( 'echo' => false ) );
 
-    $shortlink = wp_get_shortlink( $post->ID );
+	$output = '';
 
     if ( !empty( $shortlink ) ) {
-        $link = '<a rel="shortlink" href="' . esc_url( $shortlink ) . '" title="' . $title . '">' . $text . '</a>';
-        $link = apply_filters( 'the_shortlink', $link, $shortlink, $text, $title );
-        $link = $before . $link . $after;
+        $output = apply_filters( 'the_shortlink', '<a rel="shortlink" href="' . esc_url( $shortlink ) . '" title="' . $title . '">' . $text . '</a>', $shortlink, $text, $title );
+        $output = $before . $output . $after;
     }
 
-    return $link;
+    return $output;
 }
-
