@@ -24,7 +24,8 @@ function wpbitly_debug_log( $towrite, $message, $bypass = true ) {
 
     fwrite( $log, '# [ ' . date( 'F j, Y, g:i a' ) . " ]\n" );
     fwrite( $log, '# [ ' . $message . " ]\n\n" );
-    fwrite( $log, ( is_array( $towrite ) ? print_r( $towrite, true ) : var_dump( $towrite ) ) );
+    // There was a reason I wanted to export vars... may not be necessary at this point.
+    fwrite( $log, ( is_array( $towrite ) ? print_r( $towrite, true ) : var_export( $towrite, 1 ) ) );
     fwrite( $log, "\n\n\n" );
 
     fclose( $log );
@@ -100,13 +101,13 @@ function wpbitly_generate_shortlink( $post_id ) {
 		return;
 
 	// Verify this is a post we want to generate short links for
-	if ( !in_array( get_post_type( $post_id ), $wpbitly->get_option( 'post_types' ) ) && !in_array( get_post_status( $post_id ), array( 'publish', 'future', 'private' ) ) )
+	if ( !in_array( get_post_type( $post_id ), $wpbitly->get_option( 'post_types' ) ) || !in_array( get_post_status( $post_id ), array( 'publish', 'future', 'private' ) ) )
         return;
 
 
 	// We made it this far? Let's get a shortlink
 	$permalink = get_permalink( $post_id );
-    $shortlink = get_post_meta( $post_id, '_wpbitly', true );
+	$shortlink = get_post_meta( $post_id, '_wpbitly', true );
 	$token     = $wpbitly->get_option( 'oauth_token' );
 
     if ( !empty( $shortlink ) ) {
