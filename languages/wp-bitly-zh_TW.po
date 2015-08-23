@@ -1,0 +1,137 @@
+# Copyright (C) 2014 WP Bitly
+# This file is distributed under the same license as the WP Bitly package.
+msgid ""
+msgstr ""
+"Project-Id-Version: WP Bitly 2.2.5\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/tag/wp-bitly\n"
+"POT-Creation-Date: 2015-08-23 15:24+0800\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2015-08-23 15:34+0800\n"
+"Language-Team: \n"
+"X-Generator: Poedit 1.8.4\n"
+"Last-Translator: Pseric <pserics@gmail.com>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Language: zh_TW\n"
+
+#: includes/class.wp-bitly-admin.php:88
+msgid "WP Bit.Ly is almost ready!"
+msgstr "WP Bit.Ly 已經準備就緒！"
+
+#: includes/class.wp-bitly-admin.php:89
+msgid "settings page"
+msgstr "設定頁面"
+
+#: includes/class.wp-bitly-admin.php:90
+msgid "Please visit the %s to configure WP Bit.ly"
+msgstr "請訪問 %s 來設定 WP Bit.ly"
+
+#: includes/class.wp-bitly-admin.php:114
+msgid ""
+"You will need a Bitly account to use this plugin. Click the link below for "
+"your OAuth Token, and if necessary create a new account."
+msgstr ""
+"你需要一個 Bitly 帳號才能使用此外掛。點選下方鏈結來取得 OAuth Token，並在需"
+"要時建立一個新帳號。"
+
+#: includes/class.wp-bitly-admin.php:118
+msgid "Bitly OAuth Token"
+msgstr "Bitly OAuth Token"
+
+#: includes/class.wp-bitly-admin.php:131
+msgid "Please provide your"
+msgstr "請提供你的"
+
+#: includes/class.wp-bitly-admin.php:131
+msgid "OAuth Token"
+msgstr "OAuth Token"
+
+#: includes/class.wp-bitly-admin.php:138
+msgid "Post Types"
+msgstr "文章類型"
+
+#: includes/class.wp-bitly-admin.php:157
+msgid "Automatically generate shortlinks for the selected post types."
+msgstr "為選取的文章類型自動產生短網址。"
+
+#: includes/class.wp-bitly-admin.php:165
+msgid "Debug WP Bitly"
+msgstr "WP Bitly 除錯"
+
+#: includes/class.wp-bitly-admin.php:175
+msgid "Let's debug!"
+msgstr "開始除錯！"
+
+#: includes/class.wp-bitly-admin.php:176
+msgid ""
+"If you're having issues generating shortlinks, turn this on and create a "
+"thread in the"
+msgstr "如果你在產生短網址時發生問題，將這個開啟並建立一則主題在"
+
+#: includes/class.wp-bitly-admin.php:177
+msgid "WP Bitly support forums on WordPress.org"
+msgstr "WordPress.org 的 WP Bitly 支援討論區"
+
+#: includes/class.wp-bitly-admin.php:178
+msgid "support forums"
+msgstr "支援討論區"
+
+#: includes/class.wp-bitly-admin.php:277
+msgid "Bitly Statistics"
+msgstr "Bitly 統計"
+
+#: includes/class.wp-bitly-admin.php:281
+msgid "Global click through:"
+msgstr "所有點擊次數："
+
+#: includes/class.wp-bitly-admin.php:284
+msgid "Your link was shared on"
+msgstr "你的鏈結被分享到"
+
+#: includes/class.wp-bitly-admin.php:295
+msgid ""
+"There was a problem retrieving information about your link. There may be no "
+"statistics yet."
+msgstr "在檢索你的鏈結資訊時遇到問題。可能還沒有統計資料。"
+
+#: includes/functions.php:53
+msgid "WP Bitly Error: No such API endpoint."
+msgstr "WP Bitly 錯誤：沒有 API 端點。"
+
+#: includes/functions.php:187
+msgid "This is the short link."
+msgstr "這是短網址。"
+
+#: wp-bitly.php:41
+msgid "WP Bitly Error: No such option %1$s"
+msgstr "WP Bitly 錯誤：沒有 %1$s 選項"
+
+#: wp-bitly.php:237
+msgid "Settings"
+msgstr "設定"
+
+#. Plugin Name of the plugin/theme
+msgid "WP Bitly"
+msgstr "WP Bitly"
+
+#. Plugin URI of the plugin/theme
+msgid "http://wordpress.org/plugins/wp-bitly"
+msgstr "http://wordpress.org/plugins/wp-bitly"
+
+#. Description of the plugin/theme
+msgid ""
+"WP Bitly can be used to generate shortlinks for your websites posts, pages, "
+"and custom post types. Extremely lightweight and easy to set up, give it "
+"your Bitly oAuth token and go!"
+msgstr ""
+"WP Bitly 可以用於為你的網站文章、分業和自訂文章類型建立短網址。非常輕便且易"
+"於設定，只要給它你的 Bitly OAuth Token 即可開始！"
+
+#. Author of the plugin/theme
+msgid ""
+"<a href=\"http://mark.watero.us/\">Mark Waterous</a> & <a href=\"http://www."
+"chipbennett.net/\">Chip Bennett</a>"
+msgstr ""
+"<a href=“http://mark.watero.us/“>Mark Waterous</a> & <a href=“http://www."
+"chipbennett.net/“>Chip Bennett</a>"
