@@ -75,10 +75,19 @@ class WPBitlyAdmin
     }
 
 
+    /**
+     * Load our admin stylesheet if we're on the right page
+     *
+     * @since 2.4.0
+     */
     public function enqueueStyles()
     {
 
-        wp_enqueue_style('wpbitly-admin', WPBITLY_URL.'/dist/css/admin.css');
+        $screen = get_current_screen();
+
+        if ('options-writing' == $screen->base) {
+            wp_enqueue_style('wpbitly-admin', WPBITLY_URL . '/dist/css/admin.min.css');
+        }
 
     }
 
