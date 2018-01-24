@@ -164,7 +164,8 @@ class WPBitlyAdmin
             if ($auth) {
 
                 $url = add_query_arg($wp->request);
-                $output = sprintf('<a href="%s" class="button button-secondary">%s</a>', add_query_arg('disconnect', 'bitly', strtok($url, '?')), __('Disconnect', 'wp-bitly'));
+                $output = sprintf('<a href="%s" class="button button-secondary confirm-disconnect">%s</a>', add_query_arg('disconnect', 'bitly', strtok($url, '?')), __('Disconnect', 'wp-bitly'));
+                $output .= '<script>jQuery(function(n){n(".confirm-disconnect").click(function(){return window.confirm("Are you sure you want to disconnect your Bitly account?")})});</script>';
 
             } else {
                 $redirect = strtok(home_url(add_query_arg($wp->request)), '?');
