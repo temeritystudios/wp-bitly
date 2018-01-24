@@ -55,9 +55,9 @@ class WPBitlyAdmin
     {
 
         $wpbitly = wpbitly();
-        $token = $wpbitly->getOption('oauth_token');
 
         add_action('admin_init', [$this, 'registerSettings']);
+        add_action('admin_print_styles', [$this, 'enqueueStyles']);
 
         if (!$wpbitly->isAuthorized()) {
             add_action('admin_notices', [$this, 'displayNotice']);
@@ -74,6 +74,13 @@ class WPBitlyAdmin
 
     }
 
+
+    public function enqueueStyles()
+    {
+
+        wp_enqueue_style('wpbitly-admin', WPBITLY_URL.'/dist/css/admin.css');
+
+    }
 
     /**
      * Display a simple and unobtrusive notice on the plugins page after activation (and
@@ -154,8 +161,9 @@ class WPBitlyAdmin
                 $redirect = strtok(home_url(add_query_arg($wp->request)), '?');
 
                 $url = WPBITLY_REDIRECT . '?auth=bitly&state=' . urlencode(base64_encode($redirect));
+                $image = WPBITLY_URL . '/dist/images/b_logo.png';
 
-                $output = sprintf('<a href="%s" class="button button-hero button-primary">%s</a>', $url, __('Authorize', 'wp-bitly'));
+                $output = sprintf('<a href="%s" class="btn"><span class="btn-content">%s</span><span class="icon"><img src="%s"></span></a>', $url, __('Authorize', 'wp-bitly'), $image);
             }
 
             echo $output;

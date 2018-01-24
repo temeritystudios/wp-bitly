@@ -1,0 +1,73 @@
+.btn {
+  display: inline-block;
+  margin: 0;
+  padding: 24px 60px 24px 16px;
+  position: relative;
+  color: #eb6123;
+  text-decoration: none;
+  line-height: 1;
+  border: 3px solid #eb6123;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.btn .btn-content {
+  font-size: 1em;
+  line-height: 1.2;
+  padding: 0 26px;
+  position: relative;
+  right: 0;
+  -webkit-transition: right 300ms ease;
+  transition: right 300ms ease;
+  display: block;
+  text-align: left;
+}
+
+.btn .icon {
+  border-left: 1px solid #eb6123;
+  position: absolute;
+  right: 0;
+  text-align: center;
+  top: 50%;
+  -webkit-transition: all 300ms ease;
+  transition: all 300ms ease;
+  -webkit-transform: translateY(-50%);
+          transform: translateY(-50%);
+  width: 58px;
+  height: 70%;
+}
+
+.btn .icon img {
+  position: relative;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+          transform: translateY(-50%);
+  max-width: 40px;
+}
+
+.btn:after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  background-color: #eb6123;
+  opacity: 0;
+  -webkit-transition: opacity 300ms ease;
+  transition: opacity 300ms ease;
+}
+
+.btn:hover .btn-content {
+  right: 100%;
+}
+
+.btn:hover .icon {
+  border-left: 0;
+  font-size: 1.8em;
+  width: 100%;
+}
+
+.btn:hover:after {
+  opacity: .2;
+}
