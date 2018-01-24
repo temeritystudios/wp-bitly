@@ -1,108 +1,109 @@
-# Copyright (C) 2014 WP Bitly
-# This file is distributed under the same license as the WP Bitly package.
+#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: WP Bitly 2.2.5\n"
-"Report-Msgid-Bugs-To: http://wordpress.org/tag/wp-bitly\n"
-"POT-Creation-Date: 2014-04-21 12:29:51+00:00\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+"Project-Id-Version: WP Bitly\n"
+"POT-Creation-Date: 2018-01-24 13:17-0700\n"
+"PO-Revision-Date: 2018-01-24 13:17-0700\n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2014-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"X-Generator: Poedit 2.0.6\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-Flags-xgettext: --add-comments=translators:\n"
+"X-Poedit-WPHeader: wp-bitly.php\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
+"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;"
+"_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: *.js\n"
 
-#: includes/class.wp-bitly-admin.php:88
-msgid "WP Bit.Ly is almost ready!"
+#: includes/class.wp-bitly-admin.php:93
+msgid "WP Bitly is almost ready!"
 msgstr ""
 
-#: includes/class.wp-bitly-admin.php:89
+#: includes/class.wp-bitly-admin.php:94
 msgid "settings page"
 msgstr ""
 
-#: includes/class.wp-bitly-admin.php:90
-msgid "Please visit the %s to configure WP Bit.ly"
-msgstr ""
-
-#: includes/class.wp-bitly-admin.php:114
-msgid ""
-"You will need a Bitly account to use this plugin. Click the link below for "
-"your OAuth Token, and if necessary create a new account."
+#: includes/class.wp-bitly-admin.php:95
+#, php-format
+msgid "Please visit the %s to configure WP Bitly"
 msgstr ""
 
 #: includes/class.wp-bitly-admin.php:118
+msgid "You will need a Bitly account to use this plugin."
+msgstr ""
+
+#: includes/class.wp-bitly-admin.php:122
 msgid "Bitly OAuth Token"
 msgstr ""
 
-#: includes/class.wp-bitly-admin.php:131
-msgid "Please provide your"
+#: includes/class.wp-bitly-admin.php:149
+msgid "Disconnect"
 msgstr ""
 
-#: includes/class.wp-bitly-admin.php:131
-msgid "OAuth Token"
+#: includes/class.wp-bitly-admin.php:156
+msgid "Authorize"
 msgstr ""
 
-#: includes/class.wp-bitly-admin.php:138
+#: includes/class.wp-bitly-admin.php:164
 msgid "Post Types"
 msgstr ""
 
-#: includes/class.wp-bitly-admin.php:157
+#: includes/class.wp-bitly-admin.php:179
 msgid "Automatically generate shortlinks for the selected post types."
 msgstr ""
 
-#: includes/class.wp-bitly-admin.php:165
-msgid "Debug WP Bitly"
-msgstr ""
-
-#: includes/class.wp-bitly-admin.php:175
+#: includes/class.wp-bitly-admin.php:194
 msgid "Let's debug!"
 msgstr ""
 
-#: includes/class.wp-bitly-admin.php:176
+#: includes/class.wp-bitly-admin.php:194
 msgid ""
 "If you're having issues generating shortlinks, turn this on and create a "
 "thread in the"
 msgstr ""
 
-#: includes/class.wp-bitly-admin.php:177
+#: includes/class.wp-bitly-admin.php:195
 msgid "WP Bitly support forums on WordPress.org"
 msgstr ""
 
-#: includes/class.wp-bitly-admin.php:178
+#: includes/class.wp-bitly-admin.php:195
 msgid "support forums"
 msgstr ""
 
-#: includes/class.wp-bitly-admin.php:277
+#: includes/class.wp-bitly-admin.php:290
 msgid "Bitly Statistics"
 msgstr ""
 
-#: includes/class.wp-bitly-admin.php:281
+#: includes/class.wp-bitly-admin.php:294
 msgid "Global click through:"
 msgstr ""
 
-#: includes/class.wp-bitly-admin.php:284
+#: includes/class.wp-bitly-admin.php:297
 msgid "Your link was shared on"
 msgstr ""
 
-#: includes/class.wp-bitly-admin.php:295
+#: includes/class.wp-bitly-admin.php:308
 msgid ""
 "There was a problem retrieving information about your link. There may be no "
 "statistics yet."
 msgstr ""
 
-#: includes/functions.php:53
+#: includes/functions.php:58
 msgid "WP Bitly Error: No such API endpoint."
 msgstr ""
 
-#: includes/functions.php:187
-msgid "This is the short link."
-msgstr ""
-
-#: wp-bitly.php:41
+#: wp-bitly.php:36
+#, php-format
 msgid "WP Bitly Error: No such option %1$s"
 msgstr ""
 
-#: wp-bitly.php:237
+#: wp-bitly.php:227
 msgid "Settings"
 msgstr ""
 
@@ -116,13 +117,10 @@ msgstr ""
 
 #. Description of the plugin/theme
 msgid ""
-"WP Bitly can be used to generate shortlinks for your websites posts, pages, "
-"and custom post types. Extremely lightweight and easy to set up, give it "
-"your Bitly oAuth token and go!"
+"WP Bitly can be used to generate shortlinks for your website posts, pages, "
+"and custom post types. Extremely lightweight and easy to set up!"
 msgstr ""
 
 #. Author of the plugin/theme
-msgid ""
-"<a href=\"http://mark.watero.us/\">Mark Waterous</a> & <a href=\"http://www."
-"chipbennett.net/\">Chip Bennett</a>"
+msgid "<a href=\"https://temeritystudios.com/\">Temerity Studios</a>"
 msgstr ""

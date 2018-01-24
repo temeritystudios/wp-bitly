@@ -4,18 +4,20 @@
  *
  * @package     wp-bitly
  * @subpackage  admin
- * @author      Mark Waterous <mark@watero.us
- * @license     GPL-2.0+\
- * @since       2.0
+ * @author    Temerity Studios <info@temeritystudios.com>
+ * @author    Chip Bennett
+ * @license   GPL-2.0+
+ * @link      http://wordpress.org/plugins/wp-bitly
  */
 
 /**
- * Class WP_Bitly_Admin
+ * Class WPBitlyAdmin
  * This handles everything we do on the dashboard side.
  *
  * @since 2.0
  */
-class WP_Bitly_Admin {
+class WPBitlyAdmin
+{
 
     /**
      * @var $_instance An instance of ones own instance
@@ -24,18 +26,19 @@ class WP_Bitly_Admin {
 
 
     /**
-     * This creates and returns a single instance of WP_Bitly_Admin
+     * This creates and returns a single instance of WPBitlyAdmin
      *
      * @since   2.0
      * @static
-     * @uses    WP_Bitly_Admin::action_filters() To set up any necessary WordPress hooks.
-     * @return  WP_Bitly_Admin
+     * @uses    WPBitlyAdmin::defineHooks() To set up any necessary WordPress hooks.
+     * @return  WPBitlyAdmin
      */
-    public static function get_in() {
+    public static function getIn()
+    {
 
-        if (!isset(self::$_instance) && !(self::$_instance instanceof WP_Bitly_Admin)) {
+        if (!isset(self::$_instance) && !(self::$_instance instanceof WPBitlyAdmin)) {
             self::$_instance = new self;
-            self::$_instance->action_filters();
+            self::$_instance->defineHooks();
         }
 
         return self::$_instance;
@@ -48,22 +51,24 @@ class WP_Bitly_Admin {
      * @since   2.0
      * @uses    wpbitly()
      */
-    public function action_filters() {
+    public function defineHooks()
+    {
 
         $wpbitly = wpbitly();
-        $token = $wpbitly->get_option('oauth_token');
+        $token = $wpbitly->getOption('oauth_token');
 
-        add_action('admin_init', array($this, 'register_settings'));
+        add_action('admin_init', [$this, 'registerSettings']);
 
-        if (empty($token))
-            add_action('admin_notices', array($this, 'display_notice'));
+        if (!$wpbitly->isAuthorized()) {
+            add_action('admin_notices', [$this, 'displayNotice']);
+        }
 
 
-        $post_types = $wpbitly->get_option('post_types');
+        $post_types = $wpbitly->getOption('post_types');
 
         if (is_array($post_types)) {
             foreach ($post_types as $post_type) {
-                add_action('add_meta_boxes_' . $post_type, array($this, 'add_metaboxes_yo'));
+                add_action('add_meta_boxes_' . $post_type, [$this, 'addMetaboxes']);
             }
         }
 
@@ -76,19 +81,20 @@ class WP_Bitly_Admin {
      *
      * @since   2.0
      */
-    public function display_notice() {
+    public function displayNotice()
+    {
 
         $screen = get_current_screen();
 
-        if ($screen->base != 'plugins')
+        if ($screen->base != 'plugins') {
             return;
+        }
 
+        $prologue = __('WP Bitly is almost ready!', 'wp-bitly');
+        $link = sprintf('<a href="%s">', admin_url('options-writing.php')) . __('settings page', 'wp-bitly') . '</a>';
+        $epilogue = sprintf(__('Please visit the %s to configure WP Bitly', 'wp-bitly'), $link);
 
-        $prologue = __('WP Bit.Ly is almost ready!', 'wp-bitly');
-        $link = '<a href="options-writing.php">' . __('settings page', 'wp-bitly') . '</a>';
-        $epilogue = sprintf(__('Please visit the %s to configure WP Bit.ly', 'wp-bitly'), $link);
-
-        $message = apply_filters('wpbitly_setup_notice', '<div id="message" class="updated"><p>' . $prologue . ' ' . $epilogue . '</p></div>');
+        $message = apply_filters('wpbitly_setup_notice', sprintf('<div id="message" class="updated"><p>%s %s</p></div>', $prologue, $epilogue));
 
         echo $message;
 
@@ -101,31 +107,54 @@ class WP_Bitly_Admin {
      *
      * @since   2.0
      */
-    public function register_settings() {
+    public function registerSettings()
+    {
 
-        register_setting('writing', 'wpbitly-options', array($this, 'validate_settings'));
+        register_setting('writing', 'wpbitly-options', [$this, 'validateSettings']);
 
         add_settings_section('wpbitly_settings', 'WP Bitly Options', '_f_settings_section', 'writing');
-        /**
-         * @ignore
-         */
-        function _f_settings_section() {
-            echo apply_filters('wpbitly_settings_section', '<p>' . __('You will need a Bitly account to use this plugin. Click the link below for your OAuth Token, and if necessary create a new account.', 'wp-bitly') . '</p>');
+        function _f_settings_section()
+        {
+            echo apply_filters('wpbitly_settings_section', '<p>' . __('You will need a Bitly account to use this plugin.', 'wp-bitly') . '</p>');
         }
 
 
         add_settings_field('oauth_token', '<label for="oauth_token">' . __('Bitly OAuth Token', 'wpbitly') . '</label>', '_f_settings_field_oauth', 'writing', 'wpbitly_settings');
-        /**
-         * @ignore
-         */
-        function _f_settings_field_oauth() {
+        function _f_settings_field_oauth()
+        {
 
             $wpbitly = wpbitly();
+            $auth = $wpbitly->isAuthorized();
 
-            $url = apply_filters('wpbitly_oauth_url', 'https://bitly.com/a/wordpress_oauth_app');
+            if (!$auth && isset($_GET['tk']) && isset($_GET['login'])) {
 
-            $auth_css = $wpbitly->get_option('authorized') ? '' : ' style="border-color: #c00; background-color: #ffecec;" ';
-            $output = '<input type="text" size="80" name="wpbitly-options[oauth_token]" value="' . esc_attr($wpbitly->get_option('oauth_token')) . '"' . $auth_css . ' />' . '<p class="description">' . __('Please provide your', 'wp-bitly') . ' <a href="' . $url . '" target="_blank" style="text-decoration: none;"> ' . __('OAuth Token', 'wp-bitly') . '</a></p>';
+                $wpbitly->setOption('oauth_token', esc_attr($_GET['tk']));
+                $wpbitly->setOption('oauth_login', esc_attr($_GET['login']));
+
+                $wpbitly->setAuthorized();
+                $auth = true;
+
+            }
+
+            if ($auth && isset($_GET['disconnect']) && 'bitly' == $_GET['disconnect']) {
+                $wpbitly->setOption('oauth_token', '');
+                $wpbitly->setOption('oauth_login', '');
+                $wpbitly->set_authorized(false);
+            }
+
+
+            if ($auth) {
+
+                $url = admin_url(add_query_arg($wp->request));
+                $output = sprintf('<a href="%s" class="button button-secondary">%s</a>', add_query_arg('disconnect', 'bitly', strtok($url, '?')), __('Disconnect', 'wp-bitly'));
+
+            } else {
+                $redirect = strtok(home_url(add_query_arg($wp->request)), '?');
+
+                $url = WPBITLY_REDIRECT . '?auth=bitly&state=' . urlencode(base64_encode($redirect));
+
+                $output = sprintf('<a href="%s" class="button button-hero button-primary">%s</a>', $url, __('Authorize', 'wp-bitly'));
+            }
 
             echo $output;
 
@@ -133,37 +162,38 @@ class WP_Bitly_Admin {
 
 
         add_settings_field('post_types', '<label for="post_types">' . __('Post Types', 'wp-bitly') . '</label>', '_f_settings_field_post_types', 'writing', 'wpbitly_settings');
-        /**
-         * @ignore
-         */
-        function _f_settings_field_post_types() {
+        function _f_settings_field_post_types()
+        {
 
             $wpbitly = wpbitly();
 
-            $post_types = apply_filters('wpbitly_allowed_post_types', get_post_types(array('public' => true)));
+            $post_types = apply_filters('wpbitly_allowed_post_types', get_post_types(['public' => true]));
             $output = '<fieldset><legend class="screen-reader-text"><span>Post Types</span></legend>';
 
-            $current_post_types = $wpbitly->get_option('post_types');
+            $current_post_types = $wpbitly->getOption('post_types');
             foreach ($post_types as $label) {
-                $output .= '<label for "' . $label . '>' . '<input type="checkbox" name="wpbitly-options[post_types][]" value="' . $label . '" ' . checked(in_array($label, $current_post_types), true, false) . '>' . $label . '</label><br>';
+                $output .= '<label for "' . $label . '>' . '<input type="checkbox" name="wpbitly-options[post_types][]" value="' . $label . '" ' . checked(in_array($label, $current_post_types), true,
+                        false) . '>' . $label . '</label><br>';
             }
 
-            $output .= '<p class="description">' . __('Automatically generate shortlinks for the selected post types.', 'wp-bitly') . '</p>' . '</fieldset>';
+            $output .= '<p class="description">' . __('Automatically generate shortlinks for the selected post types.', 'wp-bitly') . '</p>';
+            $output .= '</fieldset>';
 
             echo $output;
 
         }
 
 
-        add_settings_field('debug', '<label for="debug">' . __('Debug WP Bitly', 'wp-bitly') . '</label>', '_f_settings_field_debug', 'writing', 'wpbitly_settings');
-        /**
-         * @ignore
-         */
-        function _f_settings_field_debug() {
+        //add_settings_field('debug', '<label for="debug">' . __('Debug WP Bitly', 'wp-bitly') . '</label>', '_f_settings_field_debug', 'writing', 'wpbitly_settings');
+        function _f_settings_field_debug()
+        {
 
             $wpbitly = wpbitly();
 
-            $output = '<fieldset><legend class="screen-reader-text"><span>Debug WP Bitly</span></legend>' . '<label title="debug"><input type="checkbox" id="debug" name="wpbitly-options[debug]" value="1" ' . checked($wpbitly->get_option('debug'), 1, 0) . '><span> ' . __("Let's debug!", 'wpbitly') . '</span></label><br>' . '<p class="description">' . __("If you're having issues generating shortlinks, turn this on and create a thread in the", 'wpbitly') . ' ' . '<a href="http://wordpress.org/support/plugin/wp-bitly" title="' . __('WP Bitly support forums on WordPress.org', 'wpbitly') . '">' . __('support forums', 'wpbitly') . '</a>.</p>' . '</fieldset>';
+            $output = '<fieldset><legend class="screen-reader-text"><span>Debug WP Bitly</span></legend>' . '<label title="debug"><input type="checkbox" id="debug" name="wpbitly-options[debug]" value="1" ' . checked($wpbitly->getOption('debug'),
+                    1, 0) . '><span> ' . __("Let's debug!", 'wpbitly') . '</span></label><br>' . '<p class="description">' . __("If you're having issues generating shortlinks, turn this on and create a thread in the",
+                    'wpbitly') . ' ' . '<a href="http://wordpress.org/support/plugin/wp-bitly" title="' . __('WP Bitly support forums on WordPress.org', 'wpbitly') . '">' . __('support forums',
+                    'wpbitly') . '</a>.</p>' . '</fieldset>';
 
             echo $output;
 
@@ -173,40 +203,26 @@ class WP_Bitly_Admin {
 
 
     /**
-     * Validate user settings. This will also authorize their OAuth token if it has
-     * changed.
+     * Validate user settings.
      *
      * @since   2.0
-     * @uses    wpbitly()
-     *
      * @param   array $input WordPress sanitized data array
-     *
-     * @return  array           WP Bit.ly sanitized data
+     * @return  array           WP Bitly sanitized data
      */
-    public function validate_settings($input) {
-
-        $wpbitly = wpbitly();
+    public function validateSettings($input)
+    {
 
         $input['debug'] = ('1' == $input['debug']) ? true : false;
 
-        $input['oauth_token'] = sanitize_text_field($input['oauth_token']);
-
-        $url = sprintf(wpbitly_api('user/info'), $input['oauth_token']);
-        $response = wpbitly_get($url);
-
-        wpbitly_debug_log($response, 'Validate OAuth', $input['debug']);
-
-
-        $input['authorized'] = (isset($response['data']['member_since'])) ? true : false;
-
         if (!isset($input['post_types'])) {
-            $input['post_types'] = array();
+            $input['post_types'] = [];
         } else {
-            $post_types = apply_filters('wpbitly_allowed_post_types', get_post_types(array('public' => true)));
+            $post_types = apply_filters('wpbitly_allowed_post_types', get_post_types(['public' => true]));
 
             foreach ($input['post_types'] as $key => $pt) {
-                if (!in_array($pt, $post_types))
-                    unset($input['post_types'][ $key ]);
+                if (!in_array($pt, $post_types)) {
+                    unset($input['post_types'][$key]);
+                }
             }
 
         }
@@ -217,24 +233,25 @@ class WP_Bitly_Admin {
 
 
     /**
-     * Add a fun little statistics metabox to any posts/pages that WP Bit.ly
+     * Add a fun little statistics metabox to any posts/pages that WP Bitly
      * generates a link for. There's potential here to include more information.
      *
      * @since   2.0
-     * @TODO    Should the user can turn this on or off? You heard me.
-     *
      * @param   object $post The post object passed by WordPress
      */
-    public function add_metaboxes_yo($post) {
+    public function addMetaboxes($post)
+    {
 
         $shortlink = get_post_meta($post->ID, '_wpbitly', true);
-        if (!$shortlink)
+        
+        if (!$shortlink) {
             return;
+        }
 
-        add_meta_box('wpbitly-meta', 'WP Bit.ly', array(
-                $this,
-                'display_metabox'
-            ), $post->post_type, 'side', 'default', array($shortlink));
+        add_meta_box('wpbitly-meta', 'WP Bitly', [
+            $this,
+            'displayMetabox'
+        ], $post->post_type, 'side', 'default', [$shortlink]);
     }
 
 
@@ -242,30 +259,32 @@ class WP_Bitly_Admin {
      * Handles the display of the metabox.
      *
      * @since   2.0
-     *
      * @param   object $post WordPress passed $post object
-     * @param   array  $args Passed by our call to add_meta_box(), just the $shortlink in this case.
+     * @param   array $args Passed by our call to add_meta_box(), just the $shortlink in this case.
      */
-    public function display_metabox($post, $args) {
+    public function displayMetabox($post, $args)
+    {
 
         $wpbitly = wpbitly();
         $shortlink = $args['args'][0];
 
 
         // Look for a clicks response
-        $url = sprintf(wpbitly_api('link/clicks'), $wpbitly->get_option('oauth_token'), $shortlink);
+        $url = sprintf(wpbitly_api('link/clicks'), $wpbitly->getOption('oauth_token'), $shortlink);
         $response = wpbitly_get($url);
 
-        if (is_array($response))
+        if (is_array($response)) {
             $clicks = $response['data']['link_clicks'];
+        }
 
 
         // Look for referring domains metadata
-        $url = sprintf(wpbitly_api('link/refer'), $wpbitly->get_option('oauth_token'), $shortlink);
+        $url = sprintf(wpbitly_api('link/refer'), $wpbitly->getOption('oauth_token'), $shortlink);
         $response = wpbitly_get($url);
 
-        if (is_array($response))
+        if (is_array($response)) {
             $refer = $response['data']['referring_domains'];
+        }
 
 
         echo '<label class="screen-reader-text" for="new-tag-post_tag">' . __('Bitly Statistics', 'wp-bitly') . '</label>';
@@ -293,5 +312,5 @@ class WP_Bitly_Admin {
 
 }
 
-// Get... in!
-WP_Bitly_Admin::get_in();
+
+WPBitlyAdmin::getIn();

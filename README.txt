@@ -1,9 +1,9 @@
 === Plugin Name ===
-Contributors: delayedinsanity, chipbennett
-Tags: shortlink, short, link, bitly, url, shortener, social, media, twitter, share
-Requires at least: 3.9
-Tested up to: 3.9
-Stable tag: 2.3.2
+Contributors: temeritystudios
+Tags: shortlink, short, link, bitly, url, shortener, social, media, twitter, facebook, share
+Requires at least: 4.5
+Tested up to: 4.9.2
+Stable tag: 2.4.0
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -23,7 +23,7 @@ WP Bitly also provides some insights (via a metabox on your edit post screen) as
 = Coming Soon =
 
 * More feedback from Bitly on how your link is generating leads
-* Feature Requests are welcome via the [Support Forum](http://wordpress.org/support/plugin/wp-bitly)
+* Feature Requests are welcome via the [Support Forum](https://wordpress.org/support/plugin/wp-bitly)
 
 = This Plugin is GPL =
 
@@ -44,7 +44,7 @@ You will need to upgrade from the WordPress dashboard, and navigate to the *Dash
 2. Enter "WP Bitly" in the search field
 3. Select *Install Now*, click *OK* and finally *Activate Plugin*
 4. This will return you to the WordPress Plugins page. Find WP Bitly in the list and click the *Settings* link to configure.
-5. Enter your OAuth token, and that's all! You're done!
+5. Authenticate with Bitly and that's all, you're done!
 
 
 == Frequently Asked Questions ==
@@ -69,11 +69,13 @@ Sure can! Just use our handy dandy shortcode `[wpbitly]` and shazam! The shortco
 
 == Upgrade Notice ==
 
-= 2.3.2 =
-Minor fixes, including a typo in the main callback. Also disables previously generated shortlinks after the fact for unselected post types.
+= 2.4.0 =
+WordPress 4.9.2 ready! WP Bitly is back!
 
 == Changelog ==
 
+= 2.4.0=
+* Updated for use with WordPress 4.9.2 and current Bitly Oauth
 = 2.3.2 =
 * Fixed a typo in `wpbitly_shortlink`
 = 2.3.0 =
@@ -93,7 +95,6 @@ Minor fixes, including a typo in the main callback. Also disables previously gen
 = 2.0 =
 * Updated for WordPress 3.8.1
 * Updated Bitly API to V3
-* Added WP Bitly to GitHub at https://github.com/mwaterous/wp-bitly
 = 1.0.1 =
 * Fixed bad settings page link in plugin row meta on Manage Plugins page
 = 1.0 =

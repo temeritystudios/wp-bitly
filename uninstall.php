@@ -1,10 +1,9 @@
 <?php
 /**
  * @package   wp-bitly
- * @author    Mark Waterous <mark@watero.us>
+ * @author    Temerity Studios <info@temeritystudios.com>
  * @license   GPL-2.0+
  * @link      http://wordpress.org/plugins/wp-bitly
- * @copyright 2014 Mark Waterous
  */
 
 if (!defined('WP_UNINSTALL_PLUGIN'))
@@ -19,7 +18,8 @@ if (!defined('WP_UNINSTALL_PLUGIN'))
  */
 function wpbitly_uninstall() {
     // Delete associated options
-    delete_option('wpbitly-options');
+    delete_option(WPBITLY_OPTIONS);
+    delete_option(WPBITLY_AUTHORIZED);
 
     // Grab all posts with an attached shortlink
     $posts = get_posts('numberposts=-1&post_type=any&meta_key=_wpbitly');
