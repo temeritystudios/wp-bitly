@@ -78,7 +78,7 @@ class WPBitlyAdmin
     /**
      * Load our admin stylesheet if we're on the right page
      *
-     * @since 2.4.0
+     * @since  2.4.1
      */
     public function enqueueStyles()
     {

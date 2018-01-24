@@ -3,7 +3,7 @@ Contributors: temeritystudios, chipbennett
 Tags: shortlink, short, link, bitly, url, shortener, social, media, twitter, facebook, share
 Requires at least: 4.5
 Tested up to: 4.9.2
-Stable tag: 2.4.0
+Stable tag:  2.4.1
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
