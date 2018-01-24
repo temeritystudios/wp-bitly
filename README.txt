@@ -1,5 +1,5 @@
 === Plugin Name ===
-Contributors: temeritystudios
+Contributors: temeritystudios, chipbennett
 Tags: shortlink, short, link, bitly, url, shortener, social, media, twitter, facebook, share
 Requires at least: 4.5
 Tested up to: 4.9.2
