@@ -126,12 +126,12 @@ class WPBitlyAdmin
             $wpbitly = wpbitly();
             $auth = $wpbitly->isAuthorized();
 
-            if (!$auth && isset($_GET['tk']) && isset($_GET['login'])) {
+            if (!$auth && isset($_GET['access_token']) && isset($_GET['login'])) {
 
-                $wpbitly->setOption('oauth_token', esc_attr($_GET['tk']));
+                $wpbitly->setOption('oauth_token', esc_attr($_GET['access_token']));
                 $wpbitly->setOption('oauth_login', esc_attr($_GET['login']));
 
-                $wpbitly->setAuthorized();
+                $wpbitly->authorize();
                 $auth = true;
 
             }
@@ -139,13 +139,15 @@ class WPBitlyAdmin
             if ($auth && isset($_GET['disconnect']) && 'bitly' == $_GET['disconnect']) {
                 $wpbitly->setOption('oauth_token', '');
                 $wpbitly->setOption('oauth_login', '');
-                $wpbitly->set_authorized(false);
+
+                $wpbitly->authorize(false);
+                $auth = false;
             }
 
 
             if ($auth) {
 
-                $url = admin_url(add_query_arg($wp->request));
+                $url = add_query_arg($wp->request);
                 $output = sprintf('<a href="%s" class="button button-secondary">%s</a>', add_query_arg('disconnect', 'bitly', strtok($url, '?')), __('Disconnect', 'wp-bitly'));
 
             } else {

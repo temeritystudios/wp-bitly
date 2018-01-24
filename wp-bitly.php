@@ -101,7 +101,7 @@ final class WPBitly
             'debug' => false,
         ));
 
-        $this->_options = wp_parse_args(getOption(WPBITLY_OPTIONS), $defaults);
+        $this->_options = wp_parse_args(get_option(WPBITLY_OPTIONS), $defaults);
 
     }
 
