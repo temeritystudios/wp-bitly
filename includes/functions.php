@@ -7,12 +7,13 @@
  * @link      http://wordpress.org/plugins/wp-bitly
  */
 
-
 /**
  * Write to a WP Bitly debug log file
  *
  * @since 2.2.3
- * @param   string $towrite The data we want to add to the logfile
+ * @param string $towrite The data to be written
+ * @param string $message A string identifying this log entry
+ * @param bool $bypass If true, will log regardless of user setting
  */
 function wpbitly_debug_log($towrite, $message, $bypass = true)
 {
@@ -22,7 +23,6 @@ function wpbitly_debug_log($towrite, $message, $bypass = true)
     if (!$wpbitly->getOption('debug') || !$bypass) {
         return;
     }
-
 
     $log = fopen(WPBITLY_LOG, 'a');
 
@@ -35,58 +35,55 @@ function wpbitly_debug_log($towrite, $message, $bypass = true)
 
 }
 
-
 /**
  * Retrieve the requested API endpoint.
  *
  * @since 2.0
  * @param   string $api_call Which endpoint do we need?
- * @return  string           Returns the URL for our requested API endpoint
+ * @return  string Returns the URL for our requested API endpoint
  */
 function wpbitly_api($api_call)
 {
 
-    $api_links = [
+    $api_links = array(
         'shorten' => 'shorten?access_token=%1$s&longUrl=%2$s',
         'expand' => 'expand?access_token=%1$s&shortUrl=%2$s',
         'link/clicks' => 'link/clicks?access_token=%1$s&link=%2$s',
         'link/refer' => 'link/referring_domains?access_token=%1$s&link=%2$s',
-        'user/info' => 'user/info?access_token=%1$s',
-    ];
+        'user/info' => 'user/info?access_token=%1$s'
+    );
 
     if (!array_key_exists($api_call, $api_links)) {
         trigger_error(__('WP Bitly Error: No such API endpoint.', 'wp-bitly'));
     }
 
-    return WPBITLY_BITLY_API . $api_links[$api_call];
+    return WPBITLY_BITLY_API . $api_links[ $api_call ];
 }
-
 
 /**
  * WP Bitly wrapper for wp_remote_get that verifies a successful response.
  *
  * @since   2.1
  * @param   string $url The API endpoint we're contacting
- * @return  bool|array      False on failure, array on success
+ * @return  bool|array False on failure, array on success
  */
 
 function wpbitly_get($url)
 {
 
-    $the = wp_remote_get($url, ['timeout' => '30',]);
+    $the = wp_remote_get($url, array('timeout' => '30'));
 
     if (is_array($the) && '200' == $the['response']['code']) {
         return json_decode($the['body'], true);
     }
 }
 
-
 /**
  * Generates the shortlink for the post specified by $post_id.
  *
  * @since   0.1
- * @param   int $post_id The post ID we need a shortlink for.
- * @return  bool|string          Returns the shortlink on success.
+ * @param   int $post_id Identifies the post being shortened
+ * @return  bool|string  Returns the shortlink on success
  */
 
 function wpbitly_generate_shortlink($post_id)
@@ -94,28 +91,16 @@ function wpbitly_generate_shortlink($post_id)
 
     $wpbitly = wpbitly();
 
-    // Avoid creating shortlinks during an autosave
-    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
-        return;
-    }
-
-    // or for revisions
-    if (wp_is_post_revision($post_id)) {
-        return;
-    }
-
     // Token hasn't been verified, bail
     if (!$wpbitly->isAuthorized()) {
-        return;
+        return false;
     }
-
 
     // Verify this is a post we want to generate short links for
     if (!in_array(get_post_type($post_id), $wpbitly->getOption('post_types')) ||
-        !in_array(get_post_status($post_id), ['publish', 'future', 'private'])) {
-        return;
+        !in_array(get_post_status($post_id), array('publish', 'future', 'private'))) {
+        return false;
     }
-
 
     // We made it this far? Let's get a shortlink
     $permalink = get_permalink($post_id);
@@ -146,23 +131,27 @@ function wpbitly_generate_shortlink($post_id)
     return $shortlink;
 }
 
-
 /**
  * Short circuits the `pre_get_shortlink` filter.
  *
  * @since   0.1
- * @param   bool $shortlink False is passed in by default.
- * @param   int $post_id Current $post->ID, or 0 for the current post.
- * @return  string            A shortlink
+ * @param   bool $original False if no shortlink generated
+ * @param   int $post_id Current $post->ID, or 0 for the current post
+ * @return  string|mixed A shortlink if generated, $original if not
  */
 function wpbitly_get_shortlink($original, $post_id)
 {
 
     $wpbitly = wpbitly();
 
-    // Verify this is a post we want to generate short links for
-    if (!in_array(get_post_type($post_id), $wpbitly->getOption('post_types'))) {
-        return $original;
+    // Avoid creating shortlinks during an autosave
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        return;
+    }
+
+    // or for revisions
+    if (wp_is_post_revision($post_id)) {
+        return;
     }
 
     if (0 == $post_id) {
@@ -179,25 +168,24 @@ function wpbitly_get_shortlink($original, $post_id)
     return ($shortlink) ? $shortlink : $original;
 }
 
-
 /**
- * This is our shortcode handler, which could also be called directly.
+ * This can be used as a direct php call within a theme or another plugin. It also handles the [wp_bitly] shortcode.
  *
  * @since   0.1
- * @param   array $atts Default shortcode attributes.
+ * @param   array $atts Default shortcode attributes
  */
-function wpbitly_shortlink($atts = [])
+function wpbitly_shortlink($atts = array())
 {
 
     $post = get_post();
 
-    $defaults = [
+    $defaults = array(
         'text' => '',
         'title' => '',
         'before' => '',
         'after' => '',
-        'post_id' => $post->ID, // Use the current post by default, or pass an ID
-    ];
+        'post_id' => $post->ID // Use the current post by default
+    );
 
     extract(shortcode_atts($defaults, $atts));
 
@@ -209,7 +197,9 @@ function wpbitly_shortlink($atts = [])
     }
 
     if (empty($title)) {
-        $title = the_title_attribute(['echo' => false]);
+        $title = the_title_attribute(array(
+            'echo' => false
+        ));
     }
 
     $output = '';

@@ -39,7 +39,7 @@ define('WPBITLY_OPTIONS', 'wpbitly-options');
 define('WPBITLY_AUTHORIZED', 'wpbitly-authorized');
 
 define('WPBITLY_BITLY_API', 'https://api-ssl.bitly.com/v3/');
-define('WPBITLY_REDIRECT', 'https://temeritystudios.com/');
+define('WPBITLY_TEMERITY_API', 'https://api.temeritystudios.com/');
 
 /**
  * The primary controller class for everything wonderful that WP Bitly does.
@@ -125,11 +125,11 @@ final class WPBitly
      */
     public function getOption($option)
     {
-        if (!isset($this->_options[$option])) {
+        if (!isset($this->_options[ $option ])) {
             trigger_error(sprintf(WPBITLY_ERROR, ' <code>' . $option . '</code>'), E_USER_ERROR);
         }
 
-        return $this->_options[$option];
+        return $this->_options[ $option ];
     }
 
 
@@ -142,11 +142,11 @@ final class WPBitly
      */
     public function setOption($option, $value)
     {
-        if (!isset($this->_options[$option])) {
+        if (!isset($this->_options[ $option ])) {
             trigger_error(sprintf(WPBITLY_ERROR, ' <code>' . $option . '</code>'), E_USER_ERROR);
         }
 
-        $this->_options[$option] = $value;
+        $this->_options[ $option ] = $value;
         $this->_saveOptions();
     }
 
@@ -199,13 +199,12 @@ final class WPBitly
     public function defineHooks()
     {
 
-        add_filter('plugin_action_links_' . plugin_basename(__FILE__), array($this, 'addActionLinks'));
-
-        add_action('save_post', 'wpbitly_generate_shortlink');
-        add_filter('pre_get_shortlink', 'wpbitly_get_shortlink', 10, 2);
-
         add_action('init', array($this, 'loadPluginTextdomain'));
+        add_filter('plugin_action_links_' . plugin_basename(__FILE__), array($this, 'addActionLinks'));
         add_action('admin_bar_menu', 'wp_admin_bar_shortlink_menu', 90);
+
+        //add_action('save_post', 'wpbitly_generate_shortlink');
+        add_filter('pre_get_shortlink', 'wpbitly_get_shortlink', 20, 2);
 
         add_shortcode('wpbitly', 'wpbitly_shortlink');
 
