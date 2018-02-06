@@ -133,8 +133,14 @@ class WPBitlyAdmin
 
         if (!$auth && isset($_GET['access_token']) && isset($_GET['login'])) {
 
-            $wpbitly->setOption('oauth_token', esc_attr($_GET['access_token']));
-            $wpbitly->setOption('oauth_login', esc_attr($_GET['login']));
+            $token = $_GET['access_token'];
+            $login = $_GET['login'];
+
+            wpbitly_debug_log(array('Referer' => $_SERVER['HTTP_REFERER'], 'Query String' => $_SERVER['QUERY_STRING']), 'Authorizing Env');
+            wpbitly_debug_log(array('access_token' => $token, 'login' => $login, 'Escaped access_token' => esc_attr($token)), 'Authorizing');
+
+            $wpbitly->setOption('oauth_token', $token);
+            $wpbitly->setOption('oauth_login', $login);
 
             $wpbitly->authorize(true);
 
@@ -143,6 +149,8 @@ class WPBitlyAdmin
         }
 
         if ($auth && isset($_GET['disconnect']) && 'bitly' == $_GET['disconnect']) {
+
+            wpbitly_debug_log('', 'Disconnecting');
             $wpbitly->setOption('oauth_token', '');
             $wpbitly->setOption('oauth_login', '');
 
@@ -160,9 +168,11 @@ class WPBitlyAdmin
     public function authorizationSuccessfulNotice()
     {
         $wpbitly = wpbitly();
+        $token = $_GET['access_token'];
 
         if ($wpbitly->isAuthorized()) {
-            echo '<div class="notice notice-success is-dismissible"><p><strong>' . __('Success!', 'wp-bitly') . '</strong> ' . __('WP Bitly is authorized, and you can start generating shortlinks!', 'wp-bitly') . '</p></div>';
+            echo '<div class="notice notice-success is-dismissible"><p><strong>' . __('Success!', 'wp-bitly') . '</strong> ' . __('WP Bitly is authorized, and you can start generating shortlinks!', 'wp-bitly') . '<br>';
+            echo sprintf('Your access token is: <code>%s</code>', $token) . '</p></div>';
         }
     }
 
@@ -186,8 +196,8 @@ class WPBitlyAdmin
         }
 
 
-        add_settings_field('oauth_token', '<label for="oauth_token">' . __('Connect with Bitly', 'wpbitly') . '</label>', '_f_settings_field_oauth', 'writing', 'wpbitly_settings');
-        function _f_settings_field_oauth()
+        add_settings_field('authorize', '<label for="authorize">' . __('Connect with Bitly', 'wpbitly') . '</label>', '_f_settings_field_authorize', 'writing', 'wpbitly_settings');
+        function _f_settings_field_authorize()
         {
 
             $wpbitly = wpbitly();
@@ -209,6 +219,20 @@ class WPBitlyAdmin
                 $output = sprintf('<a href="%s" class="btn"><span class="btn-content">%s</span><span class="icon"><img src="%s"></span></a>', $url, __('Authorize', 'wp-bitly'), $image);
 
             }
+
+            echo $output;
+
+        }
+
+
+        add_settings_field('oauth_token', '<label for="oauth_token">' . __('Bitly OAuth Token', 'wpbitly') . '</label>', '_f_settings_field_oauth', 'writing', 'wpbitly_settings');
+        function _f_settings_field_oauth() {
+
+            $wpbitly = wpbitly();
+
+            $auth_css = $wpbitly->isAuthorized() ? '' : ' style="border-color: #c00; background-color: #ffecec;" ';
+            $output = '<input type="text" size="40" name="wpbitly-options[oauth_token]" value="' . esc_attr($wpbitly->getOption('oauth_token')) . '"' . $auth_css . '>';
+            $output .= '<p class="description">' . __('This field should auto-populate after using the authorization button above.', 'wp-bitly') . '<br>' . __('If this field remains empty, please disconnect and attempt to authorize again.', 'wp-bitly') . '</p>';
 
             echo $output;
 

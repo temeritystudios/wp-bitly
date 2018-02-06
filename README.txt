@@ -2,9 +2,9 @@
 Contributors: temeritystudios, chipbennett
 Tags: shortlink, bitly, url, shortener, custom domain, social, media, twitter, facebook, share
 Requires at least: 4.5
-Tested up to: 4.9.2
+Tested up to: 4.9.4
 Requires PHP: 5.2.4
-Stable tag:  2.4.1
+Stable tag:  2.4.3
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -50,16 +50,23 @@ The shortcode `[wpbitly]` accepts all the same arguments as the_shortlink(). You
 
 = How do I include a shortlink using PHP? =
 
-`<?php wpbitly_shortlink(); // returns the shortlink for the current post ?>`
+Return a shortlink for the current post:
+`wpbitly_shortlink();`
+
+Returns a shortlink for the page or post identified:
+`wpbitly_shortlink(42);`
 
 
 == Upgrade Notice ==
 
-= 2.4.1 =
-Updates to core functionality, adds PHP 5.2.4 support
+= 2.4.3 =
+Tested with WordPress 4.9.4, adds extended debugging information and allows for manual entry of OAuth token
 
 == Changelog ==
 
+= 2.4.3 =
+* Adds debugging to authorization process
+* Adds manual entry of the OAuth token in case automatic authorization fails
 = 2.4.1 =
 * Backwards compatible with PHP 5.2.4
 * Updates styling on settings page
