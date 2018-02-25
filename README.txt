@@ -10,20 +10,24 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Use Bitly generated shortlinks for all your WordPress posts and pages, including custom post types.
 
-
 == Description ==
 
-WP Bitly is the easiest way to replace WordPress shortlinks with Bitly links. Install the plugin, visit the settings page and authorize with your Bitly account, select the post types you'd like shortlinks generated for and that's all!
+Love WordPress? Love Bitly? What if you could access an interface between both? Now, you can.
+WP-bitly allows WordPress users to quickly and easily generate shortlinks for any page, post or
+custom post type.
 
-Shortlinks are a great way to quickly share posts on social media like Twitter, Instagram and Facebook. Just wrote an amazing post and want to share that post with your friend? It's a lot easier to text a shortlink than the full URL.
+What’s more, these shortlinks may also be embedded using a php function or a WordPress
+shortcode. No matter the type of site you own (from a personal blog to an ecommerce store and
+everything in between) WP-bitly makes it easy to share your links as and when you please.
 
-WP Bitly also provides some insights (via a metabox on your edit post screen) as to how your link is being passed around, and who's clicking on it.
+Getting started is easy as pie. Simply install the plugin, visit the settings page, and authorize with
+your Bitly account. Pick the post types you want shortlinks generated for, and voila! You’re ready to
+start sharing posts with speed and ease.
 
-= Coming Soon =
+After all, texting a shortlink is far simpler and quicker than texting the full URL.
 
-* More feedback from Bitly on how your link is generating leads
-* Feature Requests are welcome via the [Support Forum](https://wordpress.org/support/plugin/wp-bitly)
-
+**PS:** *WP Bitly also offers insights into the way in which your links do the rounds. Who’s clicking?
+Who’s sharing? With WP-bitly, you’ll always know.*
 
 == Installation ==
 
@@ -32,7 +36,6 @@ WP Bitly also provides some insights (via a metabox on your edit post screen) as
 3. Select *Install Now*, click *OK* and finally *Activate Plugin*
 4. This will return you to the WordPress Plugins page. Find WP Bitly in the list and click the *Settings* link to configure.
 5. Authenticate with Bitly, select the post types you'd like to use shortlinks with, and you're done!
-
 
 == Frequently Asked Questions ==
 
@@ -53,17 +56,27 @@ The shortcode `[wpbitly]` accepts all the same arguments as the_shortlink(). You
 Return a shortlink for the current post:
 `wpbitly_shortlink();`
 
-Returns a shortlink for the page or post identified:
+Returns a shortlink for the specified post ID:
 `wpbitly_shortlink(42);`
 
+== Screenshots ==
+
+1. Straight forward settings page, authorize the plugin and choose your post types.
+2. The new and improved statistics metabox found on any post that has an attached shortlink.
 
 == Upgrade Notice ==
+
+= 2.5.0 =
+Adds ability to regenerate shortlinks, updates to the reporting
 
 = 2.4.3 =
 Tested with WordPress 4.9.4, adds extended debugging information and allows for manual entry of OAuth token
 
 == Changelog ==
 
+= 2.5.0 =
+* Adds "Regenerate Shortlink" feature to pages and posts
+* Adds chart showing previous 7 days of activity
 = 2.4.3 =
 * Adds debugging to authorization process
 * Adds manual entry of the OAuth token in case automatic authorization fails

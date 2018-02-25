@@ -13,7 +13,7 @@
  *            Plugin Name:       WP Bitly
  *            Plugin URI:        http://wordpress.org/plugins/wp-bitly
  *            Description:       WP Bitly can be used to generate shortlinks for your website posts, pages, and custom post types. Extremely lightweight and easy to set up!
- *            Version:            2.4.3
+ *            Version:            2.5.0
  *            Author:            <a href="https://temeritystudios.com/">Temerity Studios</a>
  *            Text Domain:       wp-bitly
  *            License:           GPL-2.0+
@@ -27,7 +27,7 @@ if (!defined('WPINC')) {
 }
 
 
-define('WPBITLY_VERSION', ' 2.4.3');
+define('WPBITLY_VERSION', ' 2.5.0');
 
 define('WPBITLY_DIR', WP_PLUGIN_DIR . '/' . basename(dirname(__FILE__)));
 define('WPBITLY_URL', plugins_url() . '/' . basename(dirname(__FILE__)));

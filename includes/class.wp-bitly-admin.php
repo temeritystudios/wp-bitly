@@ -2,21 +2,20 @@
 /**
  * WP Bitly Administration
  *
- * @package     wp-bitly
- * @subpackage  admin
+ * @package     WPBitly
+ * @subpackage  WPBitly/administration
  * @author    Temerity Studios <info@temeritystudios.com>
- * @author    Chip Bennett
  * @license   GPL-2.0+
  * @link      http://wordpress.org/plugins/wp-bitly
  */
 
 /**
- * Class WPBitlyAdmin
+ * Class WPBitly_Admin
  * This handles everything we do on the dashboard side.
  *
  * @since 2.0
  */
-class WPBitlyAdmin
+class WPBitly_Admin
 {
 
     /**
@@ -26,17 +25,17 @@ class WPBitlyAdmin
 
 
     /**
-     * This creates and returns a single instance of WPBitlyAdmin
+     * This creates and returns a single instance of WPBitly_Admin
      *
      * @since   2.0
      * @static
-     * @uses    WPBitlyAdmin::defineHooks() To set up any necessary WordPress hooks.
-     * @return  WPBitlyAdmin
+     * @uses    WPBitly_Admin::defineHooks() To set up any necessary WordPress hooks.
+     * @return  WPBitly_Admin
      */
     public static function getIn()
     {
 
-        if (!isset(self::$_instance) && !(self::$_instance instanceof WPBitlyAdmin)) {
+        if (!isset(self::$_instance) && !(self::$_instance instanceof WPBitly_Admin)) {
             self::$_instance = new self;
             self::$_instance->defineHooks();
         }
@@ -57,9 +56,11 @@ class WPBitlyAdmin
         $wpbitly = wpbitly();
 
         add_action('init', array($this, 'checkForAuthorization'));
+        add_action('init', array($this, 'regenerateLinks'));
 
         add_action('admin_init', array($this, 'registerSettings'));
         add_action('admin_print_styles', array($this, 'enqueueStyles'));
+        add_action('admin_print_scripts', array($this, 'enqueueScripts'));
 
         if (!$wpbitly->isAuthorized()) {
             add_action('admin_notices', array($this, 'displaySettingsNotice'));
@@ -78,7 +79,7 @@ class WPBitlyAdmin
 
 
     /**
-     * Load our admin stylesheet if we're on the right page
+     * Load administrative stylesheets
      *
      * @since  2.4.1
      */
@@ -86,16 +87,33 @@ class WPBitlyAdmin
     {
 
         $screen = get_current_screen();
-
-        if ('options-writing' == $screen->base) {
+        if ('options-writing' == $screen->base || 'post' == $screen->base) {
             wp_enqueue_style('wpbitly-admin', WPBITLY_URL . '/dist/css/admin.min.css');
+            wp_enqueue_style('chartist', WPBITLY_URL . '/dist/vendor/chartist/chartist.min.css');
         }
 
     }
 
+
+    /**
+     * Load the Chartist scripts for our edit post screen
+     *
+     * @since  2.5.0
+     */
+    public function enqueueScripts()
+    {
+
+        $screen = get_current_screen();
+        if ('post' == $screen->base) {
+            wp_enqueue_script('chartist', WPBITLY_URL . '/dist/vendor/chartist/chartist.min.js');
+        }
+
+    }
+
+
     /**
      * Display a simple and unobtrusive notice on the plugins page after activation (and
-     * up until they add their oauth_token).
+     * up until the plugin is authorized with Bitly).
      *
      * @since   2.0
      */
@@ -126,7 +144,8 @@ class WPBitlyAdmin
      *
      * @since 2.4.1
      */
-    public function checkForAuthorization() {
+    public function checkForAuthorization()
+    {
 
         $wpbitly = wpbitly();
         $auth = $wpbitly->isAuthorized();
@@ -178,8 +197,46 @@ class WPBitlyAdmin
 
 
     /**
+     * Verifies the shortlink attached to the current post with Bitly, and regenerates the link upon failure.
+     *
+     * @uses wpbitly_generate_shortlink()
+     * @since 2.5.0
+     */
+    public function regenerateLinks()
+    {
+
+        if (isset($_GET['wpbr']) && isset($_GET['post'])) {
+
+            $wpbitly = wpbitly();
+
+            if (!$wpbitly->isAuthorized() || !is_numeric($_GET['post'])) {
+                return false;
+            }
+
+            $post_id = (int)$_GET['post'];
+            wpbitly_generate_shortlink($post_id);
+
+            add_action('admin_notices', array($this, 'regenerateSuccessfulNotice'));
+
+        }
+
+    }
+
+    /**
+     * Displays a notice at the top of the screen after a successful shortlink regeneration
+     *
+     * @since 2.5.0
+     */
+    public function regenerateSuccessfulNotice()
+    {
+        echo '<div class="notice notice-success is-dismissible"><p><strong>' . __('Success!', 'wp-bitly') . '</strong> ' . __('The shortlink for this post has been regenerated.', 'wp-bitly') . '</p></div>';
+    }
+
+
+    /**
      * Add our options array to the WordPress whitelist, append them to the existing Writing
      * options page, and handle all the callbacks.
+     * TODO: Let's separate this into its own class for future expansion. WPBitly_Admin should handle registering hooks only.
      *
      * @since   2.0
      */
@@ -226,13 +283,15 @@ class WPBitlyAdmin
 
 
         add_settings_field('oauth_token', '<label for="oauth_token">' . __('Bitly OAuth Token', 'wpbitly') . '</label>', '_f_settings_field_oauth', 'writing', 'wpbitly_settings');
-        function _f_settings_field_oauth() {
+        function _f_settings_field_oauth()
+        {
 
             $wpbitly = wpbitly();
 
             $auth_css = $wpbitly->isAuthorized() ? '' : ' style="border-color: #c00; background-color: #ffecec;" ';
             $output = '<input type="text" size="40" name="wpbitly-options[oauth_token]" value="' . esc_attr($wpbitly->getOption('oauth_token')) . '"' . $auth_css . '>';
-            $output .= '<p class="description">' . __('This field should auto-populate after using the authorization button above.', 'wp-bitly') . '<br>' . __('If this field remains empty, please disconnect and attempt to authorize again.', 'wp-bitly') . '</p>';
+            $output .= '<p class="description">' . __('This field should auto-populate after using the authorization button above.', 'wp-bitly') . '<br>';
+            $output .= __('If this field remains empty, please disconnect and attempt to authorize again.', 'wp-bitly') . '</p>';
 
             echo $output;
 
@@ -315,11 +374,11 @@ class WPBitlyAdmin
 
 
     /**
-     * Add a fun little statistics metabox to any posts/pages that WP Bitly
-     * generates a link for. There's potential here to include more information.
+     * Add the Link Administration and Statistics metabox to any post with a shortlink.
+     * TODO: Separate this from the WP_Bitly_Admin
      *
      * @since   2.0
-     * @param   object $post The post object passed by WordPress
+     * @param   object $post WordPress $post object
      */
     public function addMetaboxes($post)
     {
@@ -330,7 +389,7 @@ class WPBitlyAdmin
             return;
         }
 
-        add_meta_box('wpbitly-meta', 'WP Bitly', array(
+        add_meta_box('wpbitly-meta', __('WP Bitly', 'wp-bitly'), array(
             $this,
             'displayMetabox'
         ), $post->post_type, 'side', 'default', array($shortlink));
@@ -338,53 +397,83 @@ class WPBitlyAdmin
 
 
     /**
-     * Handles the display of the metabox.
+     * Handles the display of the metabox. Currently uses the Chartist library for displaying the past 7 days of
+     * link activity. Other potential information includes referrers and encoders. Eventually this information
+     * might open in a larger modal to display more accurately.
      *
      * @since   2.0
-     * @param   object $post WordPress passed $post object
-     * @param   array $args Passed by our call to add_meta_box(), just the $shortlink in this case.
+     * @param   object $post WordPress $post object
+     * @param   array $args The post shortlink
      */
     public function displayMetabox($post, $args)
     {
 
+        function _ceiling($number, $significance = 1)
+        {
+            return (is_numeric($number) && is_numeric($significance)) ? (ceil($number / $significance) * $significance) : false;
+        }
+
         $wpbitly = wpbitly();
         $shortlink = $args['args'][0];
+        $current_page = add_query_arg($wp->request); // used in the display partial
 
 
-        // Look for a clicks response
+        // Retrieve lifetime total
         $url = sprintf(wpbitly_api('link/clicks'), $wpbitly->getOption('oauth_token'), $shortlink);
+        $response = wpbitly_get($url);
+
+        if (is_array($response)) {
+            $totalclicks = $response['data']['link_clicks'];
+        }
+
+
+        // Retrieve last 7 days of click information (starts at current date and runs back)
+        $url = sprintf(wpbitly_api('link/clicks') . '&units=7&rollup=false', $wpbitly->getOption('oauth_token'), $shortlink);
         $response = wpbitly_get($url);
 
         if (is_array($response)) {
             $clicks = $response['data']['link_clicks'];
         }
 
+        // Build strings for use in Chartist
+        $labels_arr = array();
+        $data_arr = array();
 
-        // Look for referring domains metadata
-        $url = sprintf(wpbitly_api('link/refer'), $wpbitly->getOption('oauth_token'), $shortlink);
-        $response = wpbitly_get($url);
+        foreach (array_reverse($clicks) as $click) {
+            $labels_arr[] = date('m/d', $click['dt']);
+            $data_arr[] = $click['clicks'];
+        }
 
-        if (is_array($response)) {
-            $refer = $response['data']['referring_domains'];
+        $highest_clicks = max($data_js);
+
+        $labels_js = '"' . implode('","', $labels_arr) . '"';
+        $data_js = implode(',', $data_arr);
+
+        if ($highest_clicks < 10) {
+            $max = 10;
+        } else {
+            $max = _ceiling($highest_clicks, str_pad('100', strlen((string)$highest_clicks), '0'));
+        }
+
+        // If the current highest clicks is less than 50, _ceiling will round up to 100. Better to not exceed 50.
+        // TODO: Should this round 2020 to 2500 instead of 3000? 110 to 150 instead of 200? Etc.
+        $p = ($highest_clicks / $max) * 100;
+        if ($p < 50) {
+            $max = $max / 2;
         }
 
 
-        echo '<label class="screen-reader-text" for="new-tag-post_tag">' . __('Bitly Statistics', 'wp-bitly') . '</label>';
+        echo '<label class="screen-reader-text">' . __('WP Bitly Statistics &amp; Administration', 'wp-bitly') . '</label>';
 
-        if (isset($clicks) && isset($refer)) {
+        if (isset($totalclicks) && isset($clicks)) {
 
-            echo '<p>' . __('Global click through:', 'wp-bitly') . ' <strong>' . $clicks . '</strong></p>';
+            echo '<div class="wpbitly-clicks">';
+            echo '<p>' . __('Clicks Today', 'wp-bitly') . ' <span>' . number_format($clicks[0]['clicks']) . '</span></p>';
+            echo '<p>' . __('Clicks Over Time', 'wp-bitly') . ' <span>' . number_format($totalclicks) . '</span></p>';
+            echo '</div>';
 
-            if (!empty($refer)) {
-                echo '<h4 style="padding-bottom: 3px; border-bottom: 4px solid #eee;">' . __('Your link was shared on', 'wp-bitly') . '</h4>';
-                foreach ($refer as $domain) {
-                    if (isset($domain['url'])) {
-                        printf('<a href="%1$s" target="_blank" title="%2$s">%2$s</a> (%3$d)<br>', $domain['url'], $domain['domain'], $domain['clicks']);
-                    } else {
-                        printf('<strong>%1$s</strong> (%2$d)<br>', $domain['domain'], $domain['clicks']);
-                    }
-                }
-            }
+            require(WPBITLY_DIR . '/includes/partials/metabox-display.php');
+
 
         } else {
             echo '<p class="error">' . __('There was a problem retrieving information about your link. There may be no statistics yet.', 'wp-bitly') . '</p>';
@@ -394,5 +483,5 @@ class WPBitlyAdmin
 
 }
 
-
-WPBitlyAdmin::getIn();
+// TODO: This doesn't need to be a singleton.
+WPBitly_Admin::getIn();
