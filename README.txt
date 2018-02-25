@@ -4,7 +4,7 @@ Tags: shortlink, bitly, url, shortener, custom domain, social, media, twitter, f
 Requires at least: 4.5
 Tested up to: 4.9.4
 Requires PHP: 5.2.4
-Stable tag:  2.4.3
+Stable tag:  2.5.0
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,22 +12,15 @@ Use Bitly generated shortlinks for all your WordPress posts and pages, including
 
 == Description ==
 
-Love WordPress? Love Bitly? What if you could access an interface between both? Now, you can.
-WP-bitly allows WordPress users to quickly and easily generate shortlinks for any page, post or
-custom post type.
+Love WordPress? Love Bitly? What if you could access an interface between both? Now, you can. WP-bitly allows WordPress users to quickly and easily generate shortlinks for any page, post or custom post type.
 
-What’s more, these shortlinks may also be embedded using a php function or a WordPress
-shortcode. No matter the type of site you own (from a personal blog to an ecommerce store and
-everything in between) WP-bitly makes it easy to share your links as and when you please.
+What’s more, these shortlinks may also be embedded using a php function or a WordPress shortcode. No matter the type of site you own (from a personal blog to an ecommerce store and everything in between) WP-bitly makes it easy to share your links as and when you please.
 
-Getting started is easy as pie. Simply install the plugin, visit the settings page, and authorize with
-your Bitly account. Pick the post types you want shortlinks generated for, and voila! You’re ready to
-start sharing posts with speed and ease.
+Getting started is easy as pie. Simply install the plugin, visit the settings page, and authorize with your Bitly account. Pick the post types you want shortlinks generated for, and voila! You’re ready to start sharing posts with speed and ease.
 
 After all, texting a shortlink is far simpler and quicker than texting the full URL.
 
-**PS:** *WP Bitly also offers insights into the way in which your links do the rounds. Who’s clicking?
-Who’s sharing? With WP-bitly, you’ll always know.*
+**PS:** *WP Bitly also offers insights into the way in which your links do the rounds. Who’s clicking? Who’s sharing? With WP-bitly, you’ll always know.*
 
 == Installation ==
 
@@ -68,9 +61,6 @@ Returns a shortlink for the specified post ID:
 
 = 2.5.0 =
 Adds ability to regenerate shortlinks, updates to the reporting
-
-= 2.4.3 =
-Tested with WordPress 4.9.4, adds extended debugging information and allows for manual entry of OAuth token
 
 == Changelog ==
 
