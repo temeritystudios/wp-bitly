@@ -444,7 +444,7 @@ class WPBitly_Admin
             $data_arr[] = $click['clicks'];
         }
 
-        $highest_clicks = max($data_js);
+        $highest_clicks = max($data_arr);
 
         $labels_js = '"' . implode('","', $labels_arr) . '"';
         $data_js = implode(',', $data_arr);
