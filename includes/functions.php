@@ -76,6 +76,8 @@ function wpbitly_get($url)
     if (is_array($the) && '200' == $the['response']['code']) {
         return json_decode($the['body'], true);
     }
+
+    return false;
 }
 
 /**
@@ -113,7 +115,7 @@ function wpbitly_generate_shortlink($post_id)
 
         wpbitly_debug_log($response, '/expand/');
 
-        if ($permalink == $response['data']['expand'][0]['long_url']) {
+        if (is_array($response) && $permalink == $response['data']['expand'][0]['long_url']) {
             return $shortlink;
         }
     }
@@ -128,7 +130,7 @@ function wpbitly_generate_shortlink($post_id)
         update_post_meta($post_id, '_wpbitly', $shortlink);
     }
 
-    return $shortlink;
+    return ($shortlink) ? $shortlink : false;
 }
 
 /**
@@ -182,17 +184,23 @@ function wpbitly_get_shortlink($original, $post_id)
 function wpbitly_shortlink($atts = array())
 {
 
+    $output = '';
+
     $post = get_post();
+    $post_id = (is_object($post) && !empty($post->ID)) ? $post->ID : '';
 
     $defaults = array(
         'text' => '',
         'title' => '',
         'before' => '',
         'after' => '',
-        'post_id' => $post->ID // Use the current post by default
+        'post_id' => $post_id
     );
 
     extract(shortcode_atts($defaults, $atts));
+    if (!$post_id) {
+        return $output;
+    }
 
     $permalink = get_permalink($post_id);
     $shortlink = wpbitly_get_shortlink($permalink, $post_id);
@@ -207,10 +215,8 @@ function wpbitly_shortlink($atts = array())
         ));
     }
 
-    $output = '';
-
     if (!empty($shortlink)) {
-        $output = apply_filters('the_shortlink', '<a rel="shortlink" href="' . esc_url($shortlink) . '" title="' . $title . '">' . $text . '</a>', $shortlink, $text, $title);
+        $output = apply_filters('the_shortlink', sprintf('<a rel="shortlink" href="%s" title="%s">%s</a>', esc_url($shortlink), $title, $text), $shortlink, $text, $title);
         $output = $before . $output . $after;
     }
 
