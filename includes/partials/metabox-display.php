@@ -5,7 +5,7 @@
 
 <div id="wpbitly-actions">
     <div id="regenerate-action">
-        <a href="<?php echo add_query_arg('wpbr', 'true', $current_page); ?>" class="regeneratelink">Regenerate</a>
+        <a href="<?php echo add_query_arg('wpbr', 'true', $request_uri); ?>" class="regeneratelink">Regenerate</a>
     </div>
 
     <div id="getshortlink-action">

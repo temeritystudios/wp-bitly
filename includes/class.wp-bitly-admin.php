@@ -259,16 +259,17 @@ class WPBitly_Admin
 
             $wpbitly = wpbitly();
             $auth = $wpbitly->isAuthorized();
-
+            $request_uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
 
             if ($auth) {
 
-                $url = add_query_arg($wp->request);
-                $output = sprintf('<a href="%s" class="button button-danger confirm-disconnect">%s</a>', add_query_arg('disconnect', 'bitly', strtok($url, '?')), __('Disconnect', 'wp-bitly'));
+                $url = add_query_arg('disconnect', 'bitly', strtok($request_uri, '?'));
+
+                $output = sprintf('<a href="%s" class="button button-danger confirm-disconnect">%s</a>', $url, __('Disconnect', 'wp-bitly'));
                 $output .= '<script>jQuery(function(n){n(".confirm-disconnect").click(function(){return window.confirm("Are you sure you want to disconnect your Bitly account?")})});</script>';
 
             } else {
-                $redirect = strtok(home_url(add_query_arg($wp->request)), '?');
+                $redirect = strtok(home_url($request_uri), '?');
 
                 $url = WPBITLY_TEMERITY_API . '?path=bitly&action=auth&state=' . urlencode($redirect);
                 $image = WPBITLY_URL . '/dist/images/b_logo.png';
@@ -415,7 +416,7 @@ class WPBitly_Admin
 
         $wpbitly = wpbitly();
         $shortlink = $args['args'][0];
-        $current_page = add_query_arg($wp->request); // used in the display partial
+        $request_uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : ''; // used in the display partial
 
 
         // Retrieve lifetime total

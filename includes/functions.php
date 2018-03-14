@@ -143,6 +143,7 @@ function wpbitly_get_shortlink($original, $post_id)
 {
 
     $wpbitly = wpbitly();
+    $shortlink = false;
 
     // Avoid creating shortlinks during an autosave
     if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
@@ -156,13 +157,17 @@ function wpbitly_get_shortlink($original, $post_id)
 
     if (0 == $post_id) {
         $post = get_post();
-        $post_id = $post->ID;
+        if (is_object($post) && !empty($post->ID)) {
+            $post_id = $post->ID;
+        }
     }
 
-    $shortlink = get_post_meta($post_id, '_wpbitly', true);
+    if ($post_id) {
+        $shortlink = get_post_meta($post_id, '_wpbitly', true);
 
-    if (!$shortlink) {
-        $shortlink = wpbitly_generate_shortlink($post_id);
+        if (!$shortlink) {
+            $shortlink = wpbitly_generate_shortlink($post_id);
+        }
     }
 
     return ($shortlink) ? $shortlink : $original;
