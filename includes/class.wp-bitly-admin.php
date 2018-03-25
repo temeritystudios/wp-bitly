@@ -214,7 +214,7 @@ class WPBitly_Admin
             }
 
             $post_id = (int)$_GET['post'];
-            wpbitly_generate_shortlink($post_id);
+            wpbitly_generate_shortlink($post_id, 1);
 
             add_action('admin_notices', array($this, 'regenerateSuccessfulNotice'));
 

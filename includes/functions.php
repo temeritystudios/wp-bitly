@@ -50,7 +50,8 @@ function wpbitly_api($api_call)
         'expand' => 'expand?access_token=%1$s&shortUrl=%2$s',
         'link/clicks' => 'link/clicks?access_token=%1$s&link=%2$s',
         'link/refer' => 'link/referring_domains?access_token=%1$s&link=%2$s',
-        'user/info' => 'user/info?access_token=%1$s'
+        'user/info' => 'user/info?access_token=%1$s',
+        'user/link_lookup' => 'user/link_lookup?access_token=%1$s&url=%2$s&link=%3$s'
     );
 
     if (!array_key_exists($api_call, $api_links)) {
@@ -85,10 +86,11 @@ function wpbitly_get($url)
  *
  * @since   0.1
  * @param   int $post_id Identifies the post being shortened
+ * @param   bool $bypass True bypasses the link expand API check
  * @return  bool|string  Returns the shortlink on success
  */
 
-function wpbitly_generate_shortlink($post_id)
+function wpbitly_generate_shortlink($post_id, $bypass = false)
 {
 
     $wpbitly = wpbitly();
@@ -109,7 +111,7 @@ function wpbitly_generate_shortlink($post_id)
     $shortlink = get_post_meta($post_id, '_wpbitly', true);
     $token = $wpbitly->getOption('oauth_token');
 
-    if (!empty($shortlink)) {
+    if (!empty($shortlink) && !$bypass) {
         $url = sprintf(wpbitly_api('expand'), $token, $shortlink);
         $response = wpbitly_get($url);
 
@@ -123,6 +125,9 @@ function wpbitly_generate_shortlink($post_id)
     $url = sprintf(wpbitly_api('shorten'), $token, urlencode($permalink));
     $response = wpbitly_get($url);
 
+    $url = sprintf(wpbitly_api('user/link_lookup'), $token, urlencode($permalink), '');
+
+    $response = wpbitly_get($url);
     wpbitly_debug_log($response, '/shorten/');
 
     if (is_array($response)) {
