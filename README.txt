@@ -59,11 +59,14 @@ Returns a shortlink for the specified post ID:
 
 == Upgrade Notice ==
 
-= 2.5.0 =
-Adds ability to regenerate shortlinks, updates to the reporting
+= 2.5.2 =
+2.5.x adds ability to regenerate shortlinks, new metabox and fixes a variety of php warnings.
 
 == Changelog ==
 
+= 2.5.2 =
+* Fixes various php warnings produced by assuming $post
+* Better response handling for wpbitly_get()
 = 2.5.0 =
 * Adds "Regenerate Shortlink" feature to pages and posts
 * Adds chart showing previous 7 days of activity
